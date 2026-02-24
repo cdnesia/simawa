@@ -236,7 +236,7 @@ class DataService
         $timestamp = time();
         $body = json_encode([]);
         $data = $timestamp . 'POST' . 'api/data-dosen' . $body;
-        $signature = hash_hmac('sha256', $data, 'N30Yvw4il9iyG6BF4hUV7D+Yrhxr61HK8r2FV48iOws=');
+        $signature = hash_hmac('sha256', $data, config('hmac_secret'));
         $response = Http::withHeaders([
             'X-API-KEY' => config('hmac_api_key'),
             'X-TIMESTAMP' => $timestamp,
@@ -257,7 +257,7 @@ class DataService
         $timestamp = time();
         $body = json_encode([]);
         $data = $timestamp . 'POST' . 'api/data-ruang' . $body;
-        $signature = hash_hmac('sha256', $data, 'N30Yvw4il9iyG6BF4hUV7D+Yrhxr61HK8r2FV48iOws=');
+        $signature = hash_hmac('sha256', $data, config('hmac_secret'));
         $response = Http::withHeaders([
             'X-API-KEY' => config('hmac_api_key'),
             'X-TIMESTAMP' => $timestamp,

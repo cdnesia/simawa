@@ -81,9 +81,9 @@ class PaymentService
         ]);
 
         $data = $timestamp . 'POST' . 'api/cek-tagihan' . $body;
-        $signature = hash_hmac('sha256', $data, 'supersecret123');
+        $signature = hash_hmac('sha256', $data, config('hmac_secret'));
         $response = Http::withHeaders([
-            'X-API-KEY' => 'kampus-client-01',
+            'X-API-KEY' => config('hmac_api_key'),
             'X-TIMESTAMP' => $timestamp,
             'X-SIGNATURE' => $signature,
         ])->post($url, json_decode($body, true));
