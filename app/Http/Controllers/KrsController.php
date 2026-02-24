@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Krs;
 use App\Services\DataService;
+use App\Services\PaymentService;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
@@ -25,32 +26,38 @@ class KrsController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create(DataService $service)
+    public function create(DataService $service, PaymentService $payment)
     {
         $npm = auth('web')->user()->npm;
         $prodi = auth('web')->user()->mahasiswa->kode_program_studi;
         $jadwalKontrak = $service->jadwalKontrakKrs($prodi);
 
         if ($jadwalKontrak) {
-            $TAAktif = $service->tahunAkademikAktif();
-            $krs = collect($service->krs($npm, $TAAktif))->values();
+            $cekBolehKontrak = collect($payment->cekKontrakMk())->first();
+            if ($cekBolehKontrak['boleh_kontrak']) {
+                $TAAktif = $service->tahunAkademikAktif();
+                $krs = collect($service->krs($npm, $TAAktif))->values();
 
-            $d['existing'] = collect($krs->first()['krs'] ?? [])
-                ->pluck('jadwal_id')
-                ->map(function ($id) {
-                    try {
-                        return Crypt::decrypt($id);
-                    } catch (DecryptException $e) {
-                        return null;
-                    }
-                })
-                ->filter()
-                ->values()
-                ->toArray();
+                $d['existing'] = collect($krs->first()['krs'] ?? [])
+                    ->pluck('jadwal_id')
+                    ->map(function ($id) {
+                        try {
+                            return Crypt::decrypt($id);
+                        } catch (DecryptException $e) {
+                            return null;
+                        }
+                    })
+                    ->filter()
+                    ->values()
+                    ->toArray();
 
-            $d['jadwal_perkuliahan'] = $service->kontrakKRS();
-            $d['metadata'] = $service->saya($npm);
-            return view('krs.jadwal-kuliah', $d);
+                $d['jadwal_perkuliahan'] = $service->kontrakKRS();
+                $d['metadata'] = $service->saya($npm);
+                return view('krs.jadwal-kuliah', $d);
+            } else {
+
+                return view('krs.krsBB');
+            }
         } else {
             return view('krs.krsError');
         }

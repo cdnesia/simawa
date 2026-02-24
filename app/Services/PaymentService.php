@@ -12,6 +12,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 class PaymentService
 {
@@ -75,18 +76,28 @@ class PaymentService
             return collect($query)->toArray();
         }
 
+        $url = config('services.simaku_url');
+        $npm = auth('web')->user()->npm;
+        $tahun_akademik = $this->tahunPembayaranAktif();
+
         $timestamp = time();
+        $nonce = Str::uuid()->toString();
+        $path = 'api/cek-tagihan';
+
         $body = json_encode([
             'npm' => $npm,
+            'tahun_akademik' => $tahun_akademik,
         ]);
 
-        $data = $timestamp . 'POST' . 'api/cek-tagihan' . $body;
-        $signature = hash_hmac('sha256', $data, config('services.hmac_api_key'));
+        $data = $timestamp . $nonce . 'POST' . $path . $body;
+        $signature = hash_hmac('sha256', $data, config('services.hmac_secret'));
         $response = Http::withHeaders([
-            'X-API-KEY' => config('services.hmac_api_key'),
+            'X-API-KEY'   => config('services.hmac_api_key'),
             'X-TIMESTAMP' => $timestamp,
+            'X-NONCE'     => $nonce,
             'X-SIGNATURE' => $signature,
-        ])->post($url, json_decode($body, true));
+        ])->withBody($body, 'application/json')
+            ->post($url . $path);
 
         $responseData = $response->json();
 
@@ -95,10 +106,7 @@ class PaymentService
         if (empty($data)) {
             return [];
         }
-        if (array_is_list($data)) {
-            return $data;
-        }
-        return [$data];
+        return $data;
     }
     public function cekTagihanTerhutang($npm = null, $tahun_akademik = [])
     {
@@ -107,11 +115,45 @@ class PaymentService
             $npm = auth('web')->user()->npm;
         }
         if (empty($tahun_akademik)) {
-            $tahun_akademik = $this->tahunPembayaranAktif($kodeProdi);
+            $tahun_akademik = $this->tahunPembayaranAktif();
         }
 
         $query = Tagihan::where('npm', $npm)->orderBy('tahun_akademik');
         $query->whereIn('tahun_akademik', $tahun_akademik);
         return $query->get();
+    }
+    public function cekKontrakMk()
+    {
+        $url = config('services.simaku_url');
+        $npm = auth('web')->user()->npm;
+        $tahun_akademik = $this->tahunAkademikAktif();
+
+        $timestamp = time();
+        $nonce = Str::uuid()->toString();
+        $path = 'api/cek-kontrak-matakuliah';
+
+        $body = json_encode([
+            'npm' => $npm,
+            'tahun_akademik' => $tahun_akademik,
+        ]);
+
+        $data = $timestamp . $nonce . 'POST' . $path . $body;
+        $signature = hash_hmac('sha256', $data, config('services.hmac_secret'));
+        $response = Http::withHeaders([
+            'X-API-KEY'   => config('services.hmac_api_key'),
+            'X-TIMESTAMP' => $timestamp,
+            'X-NONCE'     => $nonce,
+            'X-SIGNATURE' => $signature,
+        ])->withBody($body, 'application/json')
+            ->post($url . $path);
+
+        $responseData = $response->json();
+
+        $data = $responseData['data'] ?? [];
+
+        if (empty($data)) {
+            return [];
+        }
+        return [$data];
     }
 }

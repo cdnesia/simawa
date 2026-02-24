@@ -10,6 +10,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 class DataService
 {
@@ -233,44 +234,56 @@ class DataService
     }
     private function dataDosen()
     {
+        $url = "https://api.umjambi.ac.id/";
         $timestamp = time();
+        $nonce = Str::uuid()->toString();
+        $path = 'api/data-dosen';
+
         $body = json_encode([]);
-        $data = $timestamp . 'POST' . 'api/data-dosen' . $body;
+
+        $data = $timestamp . $nonce . 'POST' . $path . $body;
         $signature = hash_hmac('sha256', $data, config('services.hmac_secret'));
         $response = Http::withHeaders([
-            'X-API-KEY' => config('services.hmac_api_key'),
+            'X-API-KEY'   => config('services.hmac_api_key'),
             'X-TIMESTAMP' => $timestamp,
+            'X-NONCE'     => $nonce,
             'X-SIGNATURE' => $signature,
-        ])->post('https://api.umjambi.ac.id/api/data-dosen', json_decode($body, true));
+        ])->withBody($body, 'application/json')
+            ->post($url . $path);
+
         $responseData = $response->json();
         $data = $responseData['data'] ?? [];
+
         if (empty($data)) {
             return [];
-        }
-        if (array_is_list($data)) {
-            return $data;
         }
         return $data;
     }
     private function dataRuang()
     {
+        $url = "https://api.umjambi.ac.id/";
         $timestamp = time();
+        $nonce = Str::uuid()->toString();
+        $path = 'api/data-ruang';
+
         $body = json_encode([]);
-        $data = $timestamp . 'POST' . 'api/data-ruang' . $body;
+
+        $data = $timestamp . $nonce . 'POST' . $path . $body;
         $signature = hash_hmac('sha256', $data, config('services.hmac_secret'));
         $response = Http::withHeaders([
-            'X-API-KEY' => config('services.hmac_api_key'),
+            'X-API-KEY'   => config('services.hmac_api_key'),
             'X-TIMESTAMP' => $timestamp,
+            'X-NONCE'     => $nonce,
             'X-SIGNATURE' => $signature,
-        ])->post('https://api.umjambi.ac.id/api/data-ruang', json_decode($body, true));
+        ])->withBody($body, 'application/json')
+            ->post($url . $path);
+
         $responseData = $response->json();
 
         $data = $responseData['data'] ?? [];
+
         if (empty($data)) {
             return [];
-        }
-        if (array_is_list($data)) {
-            return $data;
         }
         return $data;
     }

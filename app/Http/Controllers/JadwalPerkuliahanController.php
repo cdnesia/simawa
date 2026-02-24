@@ -15,6 +15,7 @@ class JadwalPerkuliahanController extends Controller
     {
         $npm = auth('web')->user()->npm;
         $TAAktif = $service->tahunAkademikAktif();
+
         $d['jadwal_kuliah'] = $service->krs($npm, $TAAktif);
         return view('jadwal-kuliah.view', $d);
     }
