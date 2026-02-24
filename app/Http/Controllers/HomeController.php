@@ -38,7 +38,7 @@ class HomeController extends Controller
         $d['ips'] = $ips;
 
         $cekBeasiswa = $service->cekBeasiswa();
-        if (!$cekBeasiswa) {
+        if ($cekBeasiswa) {
             $d['tagihan_terhutang'] = [];
             $d['tagihan_sekarang'] = [];
         } else {
