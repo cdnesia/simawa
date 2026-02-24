@@ -10,6 +10,7 @@ class RiwayatPembayaranController extends Controller
 {
     public function index()
     {
+        $url = config('app.simaku_url');
         $npm = auth('web')->user()->npm;
 
         $timestamp = time();
@@ -25,7 +26,7 @@ class RiwayatPembayaranController extends Controller
             'X-API-KEY' => 'kampus-client-01',
             'X-TIMESTAMP' => $timestamp,
             'X-SIGNATURE' => $signature,
-        ])->post('https://simkeu.test/api/riwayat-pembayaran', json_decode($body, true));
+        ])->post($url, json_decode($body, true));
 
         $responseData = $response->json();
 

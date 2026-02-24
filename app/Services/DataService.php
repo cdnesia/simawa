@@ -238,7 +238,7 @@ class DataService
         $data = $timestamp . 'POST' . 'api/data-dosen' . $body;
         $signature = hash_hmac('sha256', $data, 'N30Yvw4il9iyG6BF4hUV7D+Yrhxr61HK8r2FV48iOws=');
         $response = Http::withHeaders([
-            'X-API-KEY' => 'Umjambi_o1',
+            'X-API-KEY' => config('hmac_api_key'),
             'X-TIMESTAMP' => $timestamp,
             'X-SIGNATURE' => $signature,
         ])->post('https://api.umjambi.ac.id/api/data-dosen', json_decode($body, true));
@@ -259,7 +259,7 @@ class DataService
         $data = $timestamp . 'POST' . 'api/data-ruang' . $body;
         $signature = hash_hmac('sha256', $data, 'N30Yvw4il9iyG6BF4hUV7D+Yrhxr61HK8r2FV48iOws=');
         $response = Http::withHeaders([
-            'X-API-KEY' => 'Umjambi_o1',
+            'X-API-KEY' => config('hmac_api_key'),
             'X-TIMESTAMP' => $timestamp,
             'X-SIGNATURE' => $signature,
         ])->post('https://api.umjambi.ac.id/api/data-ruang', json_decode($body, true));
