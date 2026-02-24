@@ -1,0 +1,145 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Krs;
+use App\Services\DataService;
+use Illuminate\Contracts\Encryption\DecryptException;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Str;
+
+class KrsController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(DataService $service)
+    {
+        $npm = auth('web')->user()->npm;
+        $d['krs'] = $service->krs($npm);
+        $d['metadata'] = $service->saya($npm);
+        return view('krs.view', $d);
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create(DataService $service)
+    {
+        $npm = auth('web')->user()->npm;
+        $prodi = auth('web')->user()->mahasiswa->kode_program_studi;
+        $jadwalKontrak = $service->jadwalKontrakKrs($prodi);
+
+        if ($jadwalKontrak) {
+            $TAAktif = $service->tahunAkademikAktif();
+            $krs = collect($service->krs($npm, $TAAktif))->values();
+
+            $d['existing'] = collect($krs->first()['krs'] ?? [])
+                ->pluck('jadwal_id')
+                ->map(function ($id) {
+                    try {
+                        return Crypt::decrypt($id);
+                    } catch (DecryptException $e) {
+                        return null;
+                    }
+                })
+                ->filter()
+                ->values()
+                ->toArray();
+
+            $d['jadwal_perkuliahan'] = $service->kontrakKRS();
+            $d['metadata'] = $service->saya($npm);
+            return view('krs.jadwal-kuliah', $d);
+        } else {
+            return view('krs.krsError');
+        }
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request, DataService $service)
+    {
+        if ($request->ajax()) {
+            $prodi = auth('web')->user()->mahasiswa->kode_program_studi;
+            $jadwalKontrak = $service->jadwalKontrakKrs($prodi);
+
+            if (!$jadwalKontrak) {
+                return response()->json(['success' => false, 'message' => 'Jadwal kontrak mata kuliah berakhir.']);
+            }
+
+            $TAAktif = $service->tahunAkademikAktif();
+            $insert = [
+                'jadwal_id' => Crypt::decrypt($request->jadwal_id),
+                'npm' => auth('web')->user()->npm,
+                'kode_tahun_akademik' => $TAAktif,
+            ];
+
+            Krs::insert($insert);
+            return response()->json(['success' => true, 'message' => 'Mata kuliah berhasil di kontrak.']);
+        }
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(Krs $krs)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(Krs $krs)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, $id) {}
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(Request $request, $id, DataService $service)
+    {
+        if ($request->ajax()) {
+            $prodi = auth('web')->user()->mahasiswa->kode_program_studi;
+            $jadwalKontrak = $service->jadwalKontrakKrs($prodi);
+            if (!$jadwalKontrak) {
+                return response()->json(['success' => false, 'message' => 'Jadwal kontrak mata kuliah berakhir.']);
+            }
+            $id = Crypt::decrypt($id);
+            $npm = auth('web')->user()->npm;
+            $krs = Krs::where('jadwal_id', $id)
+                ->where('npm', $npm)
+                ->first();
+
+            if (!$krs) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data tidak ditemukan'
+                ], 404);
+            }
+
+            if ($krs->persetujuan_pa == 'Y') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Mata kuliah sudah disetujui PA dan tidak dapat dihapus'
+                ], 403);
+            }
+
+            Krs::where('id', $krs->id)
+                ->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Mata kuliah berhasil dibatalkan'
+            ]);
+        }
+    }
+}
