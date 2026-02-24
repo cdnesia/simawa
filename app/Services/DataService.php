@@ -236,9 +236,9 @@ class DataService
         $timestamp = time();
         $body = json_encode([]);
         $data = $timestamp . 'POST' . 'api/data-dosen' . $body;
-        $signature = hash_hmac('sha256', $data, config('hmac_secret'));
+        $signature = hash_hmac('sha256', $data, config('services.hmac_secret'));
         $response = Http::withHeaders([
-            'X-API-KEY' => config('hmac_api_key'),
+            'X-API-KEY' => config('services.hmac_api_key'),
             'X-TIMESTAMP' => $timestamp,
             'X-SIGNATURE' => $signature,
         ])->post('https://api.umjambi.ac.id/api/data-dosen', json_decode($body, true));
@@ -257,13 +257,15 @@ class DataService
         $timestamp = time();
         $body = json_encode([]);
         $data = $timestamp . 'POST' . 'api/data-ruang' . $body;
-        $signature = hash_hmac('sha256', $data, config('hmac_secret'));
+        $signature = hash_hmac('sha256', $data, config('services.hmac_secret'));
         $response = Http::withHeaders([
-            'X-API-KEY' => config('hmac_api_key'),
+            'X-API-KEY' => config('services.hmac_api_key'),
             'X-TIMESTAMP' => $timestamp,
             'X-SIGNATURE' => $signature,
         ])->post('https://api.umjambi.ac.id/api/data-ruang', json_decode($body, true));
         $responseData = $response->json();
+
+        dd($responseData);
         $data = $responseData['data'] ?? [];
         if (empty($data)) {
             return [];

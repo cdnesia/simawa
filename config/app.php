@@ -1,11 +1,6 @@
 <?php
 
 return [
-
-
-    'simaku_url' => env('SIMAKU_URL', 'https://'),
-    'hmac_api_key' => env('HMAC_API_KEY'),
-    'hmac_secret'  => env('HMAC_SECRET'),
     /*
     |--------------------------------------------------------------------------
     | Application Name

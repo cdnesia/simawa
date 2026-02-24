@@ -68,7 +68,7 @@ class PaymentService
     }
     public function cekTagihanSekarang()
     {
-        $url = config('app.simaku_url');
+        $url = config('services.simaku_url');
         $npm = auth('web')->user()->npm;
         $query = Tagihan::where('npm', $npm)->where('tahun_akademik', $this->tahunAkademikAktif())->orderBy('tahun_akademik')->get();
         if ($query->isNotEmpty()) {
@@ -81,9 +81,9 @@ class PaymentService
         ]);
 
         $data = $timestamp . 'POST' . 'api/cek-tagihan' . $body;
-        $signature = hash_hmac('sha256', $data, config('hmac_secret'));
+        $signature = hash_hmac('sha256', $data, config('services.hmac_api_key'));
         $response = Http::withHeaders([
-            'X-API-KEY' => config('hmac_api_key'),
+            'X-API-KEY' => config('services.hmac_api_key'),
             'X-TIMESTAMP' => $timestamp,
             'X-SIGNATURE' => $signature,
         ])->post($url, json_decode($body, true));
