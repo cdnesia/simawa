@@ -265,7 +265,6 @@ class DataService
         ])->post('https://api.umjambi.ac.id/api/data-ruang', json_decode($body, true));
         $responseData = $response->json();
 
-        dd($responseData);
         $data = $responseData['data'] ?? [];
         if (empty($data)) {
             return [];
