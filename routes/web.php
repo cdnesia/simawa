@@ -25,10 +25,7 @@ use App\Http\Controllers\WhatsAppController;
 use App\Http\Controllers\WisudaController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
-
+Route::redirect('/', '/login');
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login')->middleware('guest');
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -37,7 +34,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/generate-va', [HomeController::class, 'generateVA'])->name('generate-va');
     Route::resource('jadwal-perkuliahan', JadwalPerkuliahanController::class)->only('index');
     Route::resource('biodata', BiodataController::class);
-    Route::resource('khs', KhsController::class)->only('index','show');
+    Route::resource('khs', KhsController::class)->only('index', 'show');
     Route::resource('krs', KrsController::class)->only('index', 'create', 'store', 'destroy');
     Route::resource('transkrip-nilai', TranskripNilaiController::class);
     Route::resource('pendaftaran-kkn', PendaftaranPKLController::class);
@@ -45,7 +42,11 @@ Route::middleware('auth')->group(function () {
     Route::resource('pendaftaran-sidang-tugas-akhir', PendaftaranSeminarController::class);
     Route::resource('pendaftaran-seminar-proposal', PendaftaranSidangController::class);
     Route::resource('riwayat-pembayaran', RiwayatPembayaranController::class)->only('index');
-    Route::resource('kalender-akademik', KalenderAkademikController::class);
     Route::resource('wisuda', WisudaController::class);
+
+    Route::get('/bantuan', function () {
+        return redirect()->away('mailto:ict@umjambi.ac.id?subject=Permintaan Bantuan');
+    })->name('bantuan');
+
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });

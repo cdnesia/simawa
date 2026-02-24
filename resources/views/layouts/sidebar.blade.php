@@ -55,7 +55,7 @@
         [
             'title' => 'Bantuan',
             'icon' => 'bx bx-support',
-            'route' => 'home',
+            'route' => 'bantuan',
         ],
     ];
 @endphp

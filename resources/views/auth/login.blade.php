@@ -2,19 +2,14 @@
 <html lang="en">
 
 <head>
-    <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!--favicon-->
     <link rel="icon" href="{{ asset('') }}assets/images/favicon-32x32.png" type="image/png" />
-    <!--plugins-->
     <link href="{{ asset('') }}assets/plugins/simplebar/css/simplebar.css" rel="stylesheet" />
     <link href="{{ asset('') }}assets/plugins/perfect-scrollbar/css/perfect-scrollbar.css" rel="stylesheet" />
     <link href="{{ asset('') }}assets/plugins/metismenu/css/metisMenu.min.css" rel="stylesheet" />
-    <!-- loader-->
     <link href="{{ asset('') }}assets/css/pace.min.css" rel="stylesheet" />
     <script src="{{ asset('') }}assets/js/pace.min.js"></script>
-    <!-- Bootstrap CSS -->
     <link href="{{ asset('') }}assets/css/bootstrap.min.css" rel="stylesheet">
     <link href="{{ asset('') }}assets/css/bootstrap-extended.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
@@ -25,29 +20,21 @@
         * {
             font-family: 'Poppins' !important;
             font-weight: 500;
-            /* atau 600 / 700 */
         }
     </style>
     <title>Sistem Informasi Mahasiswa</title>
 </head>
 
 <body class="">
-    <!--wrapper-->
     <div class="wrapper">
         <div class="section-authentication-cover">
             <div class="">
                 <div class="row g-0">
-
-                    <div
-                        class="col-12 col-xl-7 col-xxl-8 auth-cover-left align-items-center justify-content-center d-none d-xl-flex">
-
-                        <div class="card shadow-none bg-transparent shadow-none rounded-0 mb-0">
-                            <div class="card-body">
-                                <img src="assets/images/login-images/login-cover.svg"
-                                    class="img-fluid auth-img-cover-login" width="650" alt="" />
-                            </div>
-                        </div>
-
+                    <div class="col-12 col-xl-7 col-xxl-8 d-none d-xl-flex p-0"
+                        style="
+        height:100vh;
+        background: url('{{ asset('assets/images/cover-login.svg') }}') center center / cover no-repeat;
+     ">
                     </div>
 
                     <div class="col-12 col-xl-5 col-xxl-4 auth-cover-right align-items-center justify-content-center">
@@ -114,16 +101,11 @@
                     </div>
 
                 </div>
-                <!--end row-->
             </div>
         </div>
     </div>
-    <!--end wrapper-->
-    <!-- Bootstrap JS -->
     <script src="{{ asset('') }}assets/js/bootstrap.bundle.min.js"></script>
-    <!--plugins-->
     <script src="{{ asset('') }}assets/js/jquery.min.js"></script>
-    <!--Password show & hide js -->
     <script>
         $(document).ready(function() {
             $("#show_hide_password a").on('click', function(event) {
