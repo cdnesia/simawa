@@ -32,29 +32,7 @@ class DataService
         if ($kodeProdi) {
             $query->whereJsonContains('kode_program_studi', $kodeProdi);
         }
-        return $query->value('kode_tahun_akademik');
-    }
-    public function getData($connection = null, $table, $where = [], $select = '*')
-    {
-        $connection = $connection ?: config('database.default');
-        return DB::connection($connection)->table($table)
-            ->selectRaw($select)
-            ->when(!empty($where), function ($query) use ($where) {
-                $query->where(function ($q) use ($where) {
-                    foreach ($where as $w) {
-                        $column   = $w[0];
-                        $operator = $w[1] ?? '=';
-                        $value    = $w[2] ?? null;
-                        $boolean  = strtoupper($w[3] ?? 'AND'); // default AND
-
-                        if ($boolean === 'OR') {
-                            $q->orWhere($column, $operator, $value);
-                        } else {
-                            $q->where($column, $operator, $value);
-                        }
-                    }
-                });
-            })->get();
+        return $query->orderByDesc('id')->value('kode_tahun_akademik');
     }
     public function krs($npm = null, $tahunAkademik = null)
     {
@@ -153,17 +131,15 @@ class DataService
 
         return $krs;
     }
-    public function jadwalKontrakKrs($kodeProdi = null)
+    public function jadwalKontrakKrs()
     {
+        $kodeProdi = auth('web')->user()->mahasiswa->kode_program_studi;
         $today = Carbon::today()->toDateString();
         $query = KalenderAkademik::where('keg_kontrak_krs', 1)
             ->where('status', 'A')
-            ->where('kode_tahun_akademik', $this->tahunAkademikAktif())
+            ->where('kode_tahun_akademik', $this->tahunAkademikAktif($kodeProdi))
             ->whereDate('tanggal_mulai', '<=', $today)
             ->whereDate('tanggal_selesai', '>=', $today);
-        if ($kodeProdi) {
-            $query->whereJsonContains('kode_program_studi', $kodeProdi);
-        }
         return $query->exists();
     }
     public function kontrakKRS()
@@ -172,7 +148,7 @@ class DataService
         $ruang = collect($this->dataRuang())->keyBy('id');
         $kelasId = auth('web')->user()->mahasiswa->program_kuliah_id;
         $kodeProdi = auth('web')->user()->mahasiswa->kode_program_studi;
-        $tahunAkademik = $this->tahunAkademikAktif();
+        $tahunAkademik = $this->tahunAkademikAktif($kodeProdi);
 
         $jadwalRaw = DB::connection('db_siade')->table('tbl_jadwal_perkuliahan as j')
             ->join('master_kurikulum_matakuliah as mk', 'j.mata_kuliah_id', '=', 'mk.id')
