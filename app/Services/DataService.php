@@ -29,9 +29,7 @@ class DataService
             ->where('status', 'A')
             ->whereDate('tanggal_mulai', '<=', $today)
             ->whereDate('tanggal_selesai', '>=', $today);
-        if ($kodeProdi) {
-            $query->whereJsonContains('kode_program_studi', $kodeProdi);
-        }
+        $query->whereJsonContains('kode_program_studi', $kodeProdi);
         return $query->orderByDesc('id')->value('kode_tahun_akademik');
     }
     public function krs($npm = null, $tahunAkademik = null)

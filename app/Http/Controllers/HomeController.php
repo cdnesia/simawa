@@ -38,12 +38,14 @@ class HomeController extends Controller
         $d['ips'] = $ips;
 
         $cekBeasiswa = $service->cekBeasiswa();
+        $cekTagihanSekarang = $this->payment->generateTagihanSekarang();
+        $ambilTagihanTerhutang = $this->payment->ambilTagihanTerhutang();
         if ($cekBeasiswa) {
             $d['tagihan_terhutang'] = [];
             $d['tagihan_sekarang'] = [];
         } else {
-            $d['tagihan_terhutang'] = $this->payment->cekTagihanTerhutang();
-            $d['tagihan_sekarang'] = $this->payment->cekTagihanSekarang();
+            $d['tagihan_terhutang'] = $ambilTagihanTerhutang;
+            $d['tagihan_sekarang'] = $cekTagihanSekarang;
         }
         return view('home', $d);
     }

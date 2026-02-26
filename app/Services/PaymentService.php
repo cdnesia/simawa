@@ -2,26 +2,19 @@
 
 namespace App\Services;
 
-use App\Models\Akm;
-use App\Models\MasterBipotAngkatan;
-use App\Models\Payment;
-use App\Models\Potongan;
-use App\Models\StatusMahasiswa;
 use App\Models\Tagihan;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
 class PaymentService
 {
-    /**
-     * Create a new class instance.
-     */
-    public function __construct()
+    protected $dataService;
+
+    public function __construct(DataService $dataService)
     {
-        //
+        $this->dataService = $dataService;
     }
     private function expandTerms(int $start, int $end): array
     {
@@ -46,33 +39,20 @@ class PaymentService
         $query = DB::connection('db_simkeu')
             ->table('master_jadwal_pembayaran')
             ->select('tahun_akademik')
-            ->where('tahun_akademik', '!=', $this->tahunAkademikAktif())
+            ->where('tahun_akademik', '!=', $this->dataService->tahunAkademikAktif())
             ->whereDate('tanggal_mulai', '<=', $today)
             ->whereDate('tanggal_selesai', '>=', $today);
-        if ($kodeProdi) {
-            $query->whereJsonContains('kode_program_studi', $kodeProdi);
-        }
+        $query->whereJsonContains('kode_program_studi', $kodeProdi);
         return collect($query->pluck('tahun_akademik') ?? [])->toArray();
-    }
-    public function tahunAkademikAktif($kodeProdi = null)
-    {
-        $today = Carbon::today()->toDateString();
-        $query = DB::connection('db_siade')
-            ->table('master_tahun_akademik')
-            ->where('status', 'A')
-            ->whereDate('tanggal_mulai', '<=', $today)
-            ->whereDate('tanggal_selesai', '>=', $today);
-        if ($kodeProdi) {
-            $query->whereJsonContains('kode_program_studi', $kodeProdi);
-        }
-        return $query->value('kode_tahun_akademik');
     }
     public function cekTagihanSekarang()
     {
         $url = config('services.simaku_url');
         $npm = auth('web')->user()->npm;
-        $kodeProdi = auth('web')->user()->mahasiswa->kode_program_studi ?? null;
-        $query = Tagihan::where('npm', $npm)->where('tahun_akademik', $this->tahunAkademikAktif($kodeProdi))->orderBy('tahun_akademik')->get();
+        $kodeProdi = auth('web')->user()->mahasiswa->kode_program_studi;
+        $tahun_akademik = $this->dataService->tahunAkademikAktif($kodeProdi);
+
+        $query = Tagihan::where('npm', $npm)->where('tahun_akademik', $tahun_akademik)->orderBy('tahun_akademik')->get();
 
         if ($query->isNotEmpty()) {
             return collect($query)->toArray();
@@ -80,7 +60,6 @@ class PaymentService
 
         $url = config('services.simaku_url');
         $npm = auth('web')->user()->npm;
-        $tahun_akademik = $this->tahunPembayaranAktif($kodeProdi);
 
         $timestamp = time();
         $nonce = Str::uuid()->toString();
@@ -107,11 +86,50 @@ class PaymentService
         if (empty($data)) {
             return [];
         }
+        return [$data];
+    }
+    public function generateTagihanSekarang()
+    {
+        $url = config('services.simaku_url');
+        $npm = auth('web')->user()->npm;
+        $kodeProdi = auth('web')->user()->mahasiswa->kode_program_studi;
+        $tahun_akademik = $this->dataService->tahunAkademikAktif($kodeProdi);
+
+        $query = Tagihan::where('npm', $npm)->where('tahun_akademik', $tahun_akademik)->orderBy('tahun_akademik')->get();
+
+        if ($query->isNotEmpty()) {
+            return collect($query)->toArray();
+        }
+
+        $timestamp = time();
+        $nonce = Str::uuid()->toString();
+        $path = 'api/generate-tagihan';
+
+        $body = json_encode([
+            'npm' => $npm,
+        ]);
+
+        $data = $timestamp . $nonce . 'POST' . $path . $body;
+        $signature = hash_hmac('sha256', $data, config('services.hmac_secret'));
+        $response = Http::withHeaders([
+            'X-API-KEY'   => config('services.hmac_api_key'),
+            'X-TIMESTAMP' => $timestamp,
+            'X-NONCE'     => $nonce,
+            'X-SIGNATURE' => $signature,
+        ])->withBody($body, 'application/json')
+            ->post($url . $path);
+
+        $responseData = $response->json();
+
+        $data = $responseData['data'] ?? [];
+        if (empty($data)) {
+            return [];
+        }
         return $data;
     }
-    public function cekTagihanTerhutang($npm = null, $tahun_akademik = [])
+    public function ambilTagihanTerhutang($npm = null, $tahun_akademik = [])
     {
-        $kodeProdi = auth('web')->user()->mahasiswa->kode_program_studi ?? null;
+        $kodeProdi = auth('web')->user()->mahasiswa->kode_program_studi;
         if (!$npm) {
             $npm = auth('web')->user()->npm;
         }
@@ -127,7 +145,8 @@ class PaymentService
     {
         $url = config('services.simaku_url');
         $npm = auth('web')->user()->npm;
-        $tahun_akademik = $this->tahunAkademikAktif();
+        $kodeProdi = auth('web')->user()->mahasiswa->kode_program_studi;
+        $tahun_akademik = $this->dataService->tahunAkademikAktif($kodeProdi);
 
         $timestamp = time();
         $nonce = Str::uuid()->toString();
