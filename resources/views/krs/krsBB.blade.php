@@ -10,7 +10,7 @@
             <div class="ms-3">
                 <h6 class="mb-0 text-white">Mohon Maaf !!!</h6>
                 <div class="text-white">
-                    Anda belum melakukan pembayara pada semester ini.
+                    Anda belum melakukan pembayaran pada semester ini.
                 </div>
             </div>
         </div>

@@ -51,7 +51,7 @@ class KrsController extends Controller
                     ->values()
                     ->toArray();
 
-                $d['jadwal_perkuliahan'] = $service->kontrakKRS();
+                $d['jadwal_perkuliahan'] = $service->jadwalKuliah();
                 $d['metadata'] = $service->saya($npm);
                 return view('krs.jadwal-kuliah', $d);
             } else {
@@ -87,31 +87,6 @@ class KrsController extends Controller
             return response()->json(['success' => true, 'message' => 'Mata kuliah berhasil di kontrak.']);
         }
     }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Krs $krs)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Krs $krs)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id) {}
-
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Request $request, $id, DataService $service)
     {
         if ($request->ajax()) {

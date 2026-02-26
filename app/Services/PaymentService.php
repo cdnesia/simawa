@@ -71,14 +71,16 @@ class PaymentService
     {
         $url = config('services.simaku_url');
         $npm = auth('web')->user()->npm;
-        $query = Tagihan::where('npm', $npm)->where('tahun_akademik', $this->tahunAkademikAktif())->orderBy('tahun_akademik')->get();
+        $kodeProdi = auth('web')->user()->mahasiswa->kode_program_studi ?? null;
+        $query = Tagihan::where('npm', $npm)->where('tahun_akademik', $this->tahunAkademikAktif($kodeProdi))->orderBy('tahun_akademik')->get();
+
         if ($query->isNotEmpty()) {
             return collect($query)->toArray();
         }
 
         $url = config('services.simaku_url');
         $npm = auth('web')->user()->npm;
-        $tahun_akademik = $this->tahunPembayaranAktif();
+        $tahun_akademik = $this->tahunPembayaranAktif($kodeProdi);
 
         $timestamp = time();
         $nonce = Str::uuid()->toString();
@@ -102,7 +104,6 @@ class PaymentService
         $responseData = $response->json();
 
         $data = $responseData['data'] ?? [];
-
         if (empty($data)) {
             return [];
         }
@@ -115,7 +116,7 @@ class PaymentService
             $npm = auth('web')->user()->npm;
         }
         if (empty($tahun_akademik)) {
-            $tahun_akademik = $this->tahunPembayaranAktif();
+            $tahun_akademik = $this->tahunPembayaranAktif($kodeProdi);
         }
 
         $query = Tagihan::where('npm', $npm)->orderBy('tahun_akademik');

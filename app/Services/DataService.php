@@ -73,9 +73,7 @@ class DataService
         $total_bobot_kumulatif = 0;
 
         foreach ($krsRaw as $row) {
-
             $ta = $row->kode_tahun_akademik;
-
             if (!isset($krs[$ta])) {
                 $krs[$ta] = [
                     'semester' => $semester++,
@@ -142,7 +140,18 @@ class DataService
             ->whereDate('tanggal_selesai', '>=', $today);
         return $query->exists();
     }
-    public function kontrakKRS()
+    public function jadwalKKN()
+    {
+        $kodeProdi = auth('web')->user()->mahasiswa->kode_program_studi;
+        $today = Carbon::today()->toDateString();
+        $query = KalenderAkademik::where('keg_pendaftaran_kkn', 1)
+            ->where('status', 'A')
+            ->where('kode_tahun_akademik', $this->tahunAkademikAktif($kodeProdi))
+            ->whereDate('tanggal_mulai', '<=', $today)
+            ->whereDate('tanggal_selesai', '>=', $today);
+        return $query->exists();
+    }
+    public function jadwalKuliah()
     {
         $dosen = collect($this->dataDosen())->keyBy('id');
         $ruang = collect($this->dataRuang())->keyBy('id');
