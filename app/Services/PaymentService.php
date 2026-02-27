@@ -133,12 +133,10 @@ class PaymentService
         if (!$npm) {
             $npm = auth('web')->user()->npm;
         }
-        if (empty($tahun_akademik)) {
-            $tahun_akademik = $this->tahunPembayaranAktif($kodeProdi);
-        }
+        $tahun_akademik = $this->tahunPembayaranAktif($kodeProdi);
 
         $query = Tagihan::where('npm', $npm)->orderBy('tahun_akademik');
-        $query->whereIn('tahun_akademik', $tahun_akademik);
+        $query->where('tahun_akademik', '!=', $tahun_akademik);
         return $query->get();
     }
     public function cekKontrakMk()
