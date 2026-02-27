@@ -316,11 +316,12 @@ class DataService
     }
     public function cekBeasiswa()
     {
+        $kodeProdi = auth('web')->user()->mahasiswa->kode_program_studi;
         $npm = auth('web')->user()->npm;
         return DB::connection('db_siade')
             ->table('tbl_penerima_beasiswa')
             ->where('npm', $npm)
-            ->whereJsonContains('tahun_akademik', $this->tahunAkademikAktif())
+            ->whereJsonContains('tahun_akademik', $this->tahunAkademikAktif($kodeProdi))
             ->first();
     }
 }

@@ -34,7 +34,7 @@ class AuthController extends Controller
             if (Hash::check($plainPassword, $user->password)) {
                 Auth::login($user, $remember);
                 $request->session()->regenerate();
-                return redirect()->intended('/home');
+                return redirect()->intended('/beranda');
             } else {
                 return back()->withErrors([
                     'email' => 'NPM/Email/password salah.',
