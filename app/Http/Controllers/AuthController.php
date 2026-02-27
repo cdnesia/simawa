@@ -72,7 +72,7 @@ class AuthController extends Controller
         Auth::login($user, $remember);
         $request->session()->regenerate();
 
-        return redirect()->route('home');
+        return redirect()->url('/beranda');
     }
 
     public function logout(Request $request)
