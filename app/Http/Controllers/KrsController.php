@@ -31,10 +31,11 @@ class KrsController extends Controller
         $npm = auth('web')->user()->npm;
         $prodi = auth('web')->user()->mahasiswa->kode_program_studi;
         $jadwalKontrak = $service->jadwalKontrakKrs($prodi);
+        $cekBeasiswa = $service->cekBeasiswa();
 
         if ($jadwalKontrak) {
             $cekBolehKontrak = collect($payment->cekKontrakMk())->first();
-            if ($cekBolehKontrak['boleh_kontrak']) {
+            if ($cekBolehKontrak['boleh_kontrak'] || $cekBeasiswa) {
                 $TAAktif = $service->tahunAkademikAktif();
                 $krs = collect($service->krs($npm, $TAAktif))->values();
 
@@ -55,7 +56,6 @@ class KrsController extends Controller
                 $d['metadata'] = $service->saya($npm);
                 return view('krs.jadwal-kuliah', $d);
             } else {
-
                 return view('krs.krsBB');
             }
         } else {
