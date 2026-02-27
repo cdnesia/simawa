@@ -36,7 +36,8 @@ class KrsController extends Controller
         if ($jadwalKontrak) {
             $cekBolehKontrak = collect($payment->cekKontrakMk())->first();
             if ($cekBolehKontrak['boleh_kontrak'] || $cekBeasiswa) {
-                $TAAktif = $service->tahunAkademikAktif();
+                $TAAktif = $service->tahunAkademikAktif($prodi);
+
                 $krs = collect($service->krs($npm, $TAAktif))->values();
 
                 $d['existing'] = collect($krs->first()['krs'] ?? [])
