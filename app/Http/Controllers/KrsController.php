@@ -76,7 +76,7 @@ class KrsController extends Controller
                 return response()->json(['success' => false, 'message' => 'Jadwal kontrak mata kuliah berakhir.']);
             }
 
-            $TAAktif = $service->tahunAkademikAktif();
+            $TAAktif = $service->tahunAkademikAktif($prodi);
             $insert = [
                 'jadwal_id' => Crypt::decrypt($request->jadwal_id),
                 'npm' => auth('web')->user()->npm,
