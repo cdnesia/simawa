@@ -56,7 +56,7 @@ class DataService
                 'mk.nama_mata_kuliah_idn',
                 'mk.sks_mata_kuliah',
                 'h.nama_hari',
-                'h.id',
+                'h.id as id_hari',
             )
             ->get();
 
