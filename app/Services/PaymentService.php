@@ -133,7 +133,7 @@ class PaymentService
         if (!$npm) {
             $npm = auth('web')->user()->npm;
         }
-        $tahun_akademik = $this->tahunPembayaranAktif($kodeProdi);
+        $tahun_akademik = $this->dataService->tahunAkademikAktif($kodeProdi);
 
         $query = Tagihan::where('npm', $npm)->orderBy('tahun_akademik');
         $query->where('tahun_akademik', '!=', $tahun_akademik);
@@ -173,5 +173,66 @@ class PaymentService
             return [];
         }
         return [$data];
+    }
+    public function generateTagihanKKN($kegiatan_mahasiswa_id = null)
+    {
+        $url = config('services.simaku_url');
+        $npm = auth('web')->user()->npm;
+        $kodeProdi = auth('web')->user()->mahasiswa->kode_program_studi;
+        $tahun_akademik = $this->dataService->tahunAkademikAktif($kodeProdi);
+
+        $timestamp = time();
+        $nonce = Str::uuid()->toString();
+        $path = 'api/generate-tagihan-kkn';
+
+        $body = json_encode([
+            'npm' => $npm,
+            'tahun_akademik' => $tahun_akademik,
+            'kegiatan_mahasiswa_id' => $kegiatan_mahasiswa_id,
+        ]);
+
+        $data = $timestamp . $nonce . 'POST' . $path . $body;
+        $signature = hash_hmac('sha256', $data, config('services.hmac_secret'));
+        $response = Http::withHeaders([
+            'X-API-KEY'   => config('services.hmac_api_key'),
+            'X-TIMESTAMP' => $timestamp,
+            'X-NONCE'     => $nonce,
+            'X-SIGNATURE' => $signature,
+        ])->withBody($body, 'application/json')
+            ->post($url . $path);
+
+        $responseData = $response->json();
+
+        return $responseData;
+    }
+    public function cekTagihanKKN($kegiatan_mahasiswa_id = null)
+    {
+        $url = config('services.simaku_url');
+        $npm = auth('web')->user()->npm;
+        $kodeProdi = auth('web')->user()->mahasiswa->kode_program_studi;
+        $tahun_akademik = $this->dataService->tahunAkademikAktif($kodeProdi);
+
+        $timestamp = time();
+        $nonce = Str::uuid()->toString();
+        $path = 'api/cek-tagihan-kkn';
+
+        $body = json_encode([
+            'npm' => $npm,
+            'tahun_akademik' => $tahun_akademik,
+        ]);
+
+        $data = $timestamp . $nonce . 'POST' . $path . $body;
+        $signature = hash_hmac('sha256', $data, config('services.hmac_secret'));
+        $response = Http::withHeaders([
+            'X-API-KEY'   => config('services.hmac_api_key'),
+            'X-TIMESTAMP' => $timestamp,
+            'X-NONCE'     => $nonce,
+            'X-SIGNATURE' => $signature,
+        ])->withBody($body, 'application/json')
+            ->post($url . $path);
+
+        $responseData = $response->json();
+
+        return $responseData;
     }
 }

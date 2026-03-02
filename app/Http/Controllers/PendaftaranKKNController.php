@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\KegiatanMahasiswa;
+use App\Models\Krs;
 use App\Models\PendaftaranKKN;
 use App\Services\DataService;
+use App\Services\PaymentService;
 use Illuminate\Http\Request;
 
 class PendaftaranKKNController extends Controller
@@ -30,6 +32,12 @@ class PendaftaranKKNController extends Controller
     {
         $kodeProdi = auth('web')->user()->mahasiswa->kode_program_studi;
         $tahunAngkatan = auth('web')->user()->mahasiswa->tahun_angkatan;
+
+        $cekJadwalKKN = $dataService->JadwalKKN();
+        if (!$cekJadwalKKN) {
+            $d['jadwal_kkn'] = false;
+        }
+        $d['jadwal_kkn'] = true;
         $d['data'] = null;
         $d['persyaratan'] = KegiatanMahasiswa::where('tipe', 'KKN')
             ->whereJsonContains('kode_program_studi', $kodeProdi)
@@ -40,24 +48,73 @@ class PendaftaranKKNController extends Controller
                 unset($item->id);
                 return $item;
             })->toArray();
+
+        $tahunAktif = $dataService->tahunAkademikAktif($kodeProdi);
+        $krs = $dataService->Krs(auth('web')->user()->mahasiswa->npm);
+
+
+        $flatKrs = collect($krs)
+            ->reject(function ($semester, $tahun) use ($tahunAktif) {
+                return $tahun == $tahunAktif;
+            })
+            ->pluck('krs')
+            ->flatten(1);
+
+        $total_sks = $flatKrs->sum('sks_matakuliah');
+        $jumlahD = $flatKrs->where('nilai_huruf', 'D')->count();
+        $jumlahKosong = $flatKrs->where('nilai_huruf', '')->count();
+
+        $d['jumlah_sks'] = $total_sks;
+        $d['jumlah_d'] = $jumlahD + $jumlahKosong;
         return view('kkn.form', $d);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request, DataService $dataService, PaymentService $paymentService)
     {
         try {
+            $kodeProdi = auth('web')->user()->mahasiswa->kode_program_studi;
+            $tahunAktif = $dataService->tahunAkademikAktif($kodeProdi);
+            $krs = $dataService->Krs(auth('web')->user()->mahasiswa->npm);
+
+            $flatKrs = collect($krs)
+                ->reject(function ($semester, $tahun) use ($tahunAktif) {
+                    return $tahun == $tahunAktif;
+                })
+                ->pluck('krs')
+                ->flatten(1);
+
+            $total_sks = $flatKrs->sum('sks_matakuliah');
+            $jumlahD = $flatKrs->where('nilai_huruf', 'D')->count();
+            $jumlahKosong = $flatKrs->where('nilai_huruf', '')->count();
             $id = decrypt($request->id);
 
-            $kegiatan = KegiatanMahasiswa::findOrFail($id);
+            $persyaratan = KegiatanMahasiswa::findOrFail($id);
 
-            // PendaftaranKkn::create([
-            //     'mahasiswa_id' => auth()->user()->mahasiswa->id,
-            //     'kegiatan_id'  => $kegiatan->id,
-            //     'tanggal_daftar' => now(),
-            // ]);
+            if ($total_sks < $persyaratan->minimal_sks) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal mendaftar karena tidak memenuhi persyaratan SKS.'
+                ], 422);
+            }
+            // if ($jumlahD + $jumlahKosong > $persyaratan->maksimal_nilai_d) {
+            //     return response()->json([
+            //         'success' => false,
+            //         'message' => 'Gagal mendaftar karena tidak memenuhi persyaratan nilai D.'
+            //     ], 422);
+            // }
+
+            $paymentService->generateTagihanKKN($id);
+
+            PendaftaranKkn::insert([
+                'npm' => auth('web')->user()->mahasiswa->npm,
+                'kegiatan_mahasiswa_id'  => $persyaratan->id,
+                'tanggal_pendaftaran' => now(),
+                'id_bipot' => $persyaratan->id_bipot,
+                'biaya_pendaftaran' => $persyaratan->biaya_pendaftaran,
+            ]);
 
             return response()->json([
                 'success' => true,
@@ -66,7 +123,7 @@ class PendaftaranKKNController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal mendaftar'
+                'message' => $e->getMessage()
             ], 400);
         }
     }
