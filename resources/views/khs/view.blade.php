@@ -1,11 +1,11 @@
 @extends('layouts.app')
 @section('content')
-    <h6 class="text-uppercase">Riwayat Pembayaran</h6>
+    <h6 class="text-uppercase">Kartu hasil studi</h6>
     <hr>
     <div class="card">
         <div class="card-header">
             <div class="table-responsive">
-                <table class="table table-borderless table-sm mb-2">
+                <table class="table table-borderless table-sm mb-2" style="font-weight: bold;">
                     <tbody>
                         <tr>
                             <td style="width: 220px;">Nama Mahasiswa</td>
@@ -35,71 +35,67 @@
                     </tbody>
                 </table>
             </div>
-            <button id="hubungi_pa" class="btn btn-warning btn-sm me-1"><i class="bx bx-send"></i>Hubungi PA</button>
         </div>
     </div>
-    {{-- @dd($krs) --}}
-    @foreach ($krs as $key => $value)
-        <div class="card">
-            <div class="card-header d-flex align-items-center">
-                <h6 class="mb-0">Tahun Akademik {{ $key }} - Semester {{ $value['semester'] }}</h6>
-                <div class="ms-auto">
-                    <a href="" class="btn btn-sm btn-primary me-0"><i class="bx bx-printer mr-1"></i> Cetak</a>
-                </div>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-striped table-bordered krsTable" style="width:100%">
-                        <thead>
-                            <tr>
-                                <th rowspan="2" style="width: 30px" class="align-middle">No</th>
-                                <th rowspan="2" class="align-middle">Mata Kuliah</th>
-                                <th colspan="3" class="text-center">Nilai</th>
-                            </tr>
-                            <tr>
-                                <th class="text-center" style="width: 75px">Nilai Angka</th>
-                                <th class="text-center" style="width: 75px">Nilai Huruf</th>
-                                <th class="text-center" style="width: 75px">Nilai Bobot</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($value['krs'] as $item)
-                                <tr>
-                                    <td>{{ $loop->iteration }}</td>
-                                    <td>{{ $item['kode_mata_kuliah'] }}<br>
-                                        {{ $item['nama_mata_kuliah'] }}</td>
-                                    <td>{{ $item['nilai_angka'] }}</td>
-                                    <td>{{ $item['nilai_huruf'] }}</td>
-                                    <td>{{ $item['nilai_bobot'] }}</td>
-                                </tr>
-                            @endforeach
+    <div class="card">
+        <div class="card-body">
+            <div class="mb-3">
+                <h5>Kartu Hasil Studi</h5>
+                @if ($krs['semester'] && $krs['tahun_akademik'])
+                    <h5>Semester {{ $krs['semester'] }} - Tahun Akademik {{ $krs['tahun_akademik'] }}</h5>
+                    <a href="{{ route('khs.print') }}?periode={{ $krs['tahun_akademik'] }}" target="_blank"
+                        class="btn btn-sm btn-primary me-0"><i class="bx bx-printer mr-1"></i> Cetak</a>
+                @endif
 
-                        </tbody>
-                    </table>
-                </div>
             </div>
-            <div class="card-footer bg-white">
-                <div class="table-responsive">
-                    <table class="table table-borderless table-sm mb-2">
-                        <thead>
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered krsTable" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th class="text-center align-middle" rowspan="2" style="width: 30px">No</th>
+                            <th class="text-center align-middle" rowspan="2" style="width: 100px">Kode</th>
+                            <th class="text-center align-middle" rowspan="2" style="width: 400px">Mata Kuliah</th>
+                            <th class="text-center align-middle" rowspan="2" style="width: 50px">SKS</th>
+                            <th class="text-center align-middle" colspan="3">Nilai</th>
+                        </tr>
+                        <tr>
+                            <th class="text-center align-middle" style="width: 50px">Angka</th>
+                            <th class="text-center align-middle" style="width: 50px">Huruf</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($krs['krs'] as $item)
                             <tr>
-                                <th style="width: 100px;">IP Semester</th>
-                                <th style="width: 10px;">:</th>
-                                <th>{{ $value['metadata']['ips'] }}</th>
+                                <td>{{ $loop->iteration }}</td>
+                                <td>{{ $item['kode_mata_kuliah'] }}</td>
+                                <td>{{ $item['nama_mata_kuliah'] }}</td>
+                                <td class="text-center">{{ $item['sks_matakuliah'] }}</td>
+                                <td class="text-center">{{ $item['nilai_angka'] }}</td>
+                                <td class="text-center">{{ $item['nilai_huruf'] }}</td>
                             </tr>
-                            <tr>
-                                <th style="width: 100px;">IP Kumulatif</th>
-                                <th style="width: 10px;">:</th>
-                                <th>{{ $value['metadata']['ipk'] }}</th>
-                            </tr>
-                        </thead>
-                    </table>
-                </div>
+                        @endforeach
+                        <tr>
+                            <th colspan="6">
+                                Jumlah SKS : {{ $krs['jumlah_sks'] }} <br>
+                                IP Semester : {{ $krs['metadata']['ips'] }} <br>
+                                IP Kumulatif : {{ $krs['metadata']['ipk'] }} <br>
+                            </th>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
-    @endforeach
+        <div class="card-footer">
+            <nav aria-label="Page navigation example mb-0">
+                Pilih Semester :
+                <ul class="pagination mb-0">
+                    @foreach ($semester as $key => $item)
+                        <li class="page-item {{ request('periode') == $item ? 'active' : '' }}"><a class="page-link"
+                                href="{{ route('khs.index') }}?periode={{ $item }}">{{ $key + 1 }}</a>
+                        </li>
+                    @endforeach
+                </ul>
+            </nav>
+        </div>
+    </div>
 @endsection
-@push('css')
-@endpush
-@push('js')
-@endpush

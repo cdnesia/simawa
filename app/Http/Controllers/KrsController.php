@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Krs;
 use App\Services\DataService;
 use App\Services\PaymentService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
@@ -15,10 +16,19 @@ class KrsController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(DataService $service)
+    public function index(Request $request, DataService $service)
     {
+        $periode = $request->query('periode');
         $npm = auth('web')->user()->npm;
-        $d['krs'] = $service->krs($npm);
+        $dataKrs = $service->krs($npm);
+        $semesterKeys = array_keys($dataKrs);
+
+        if (!$periode || !preg_match('/^\d{5}$/', $periode)) {
+            $periode = array_key_first($dataKrs);
+        }
+
+        $d['semester'] = $semesterKeys;
+        $d['krs'] = $dataKrs[$periode] ?? ['tahun_akademik' => null, 'semester' => null, 'krs' => []];
         $d['metadata'] = $service->saya($npm);
         return view('krs.view', $d);
     }
@@ -124,5 +134,27 @@ class KrsController extends Controller
                 'message' => 'Mata kuliah berhasil dibatalkan'
             ]);
         }
+    }
+    public function print(Request $request, DataService $service)
+    {
+        $periode = $request->query('periode');
+        $npm = auth('web')->user()->npm;
+        $dataKrs = $service->krs($npm);
+
+        if (!$periode || !preg_match('/^\d{5}$/', $periode)) {
+            $periode = array_key_first($dataKrs);
+        }
+
+        $data = [
+            'saya' => $service->saya($npm),
+            'npm' => $npm,
+            'periode' => $periode,
+            'krs' => $dataKrs[$periode] ?? []
+        ];
+
+        $pdf = Pdf::loadView('krs.print', $data)
+            ->setPaper('A4', 'portrait');
+
+        return $pdf->stream('KRS-' . $npm . '-' . $periode . '.pdf');
     }
 }

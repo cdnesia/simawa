@@ -75,6 +75,7 @@ class DataService
             if (!isset($krs[$ta])) {
                 $krs[$ta] = [
                     'semester' => $semester++,
+                    'tahun_akademik' => $ta,
                     'jumlah_sks' => 0,
                     'total_bobot' => 0,
                     'krs' => [],
@@ -298,7 +299,6 @@ class DataService
 
         $kelas = $this->dataKelas();
         $q = MasterMahasiswa::where('npm', $npm)->first();
-
         return [
             'nama_mahasiswa' => $q->nama_mahasiswa,
             'npm' => $q->npm,
@@ -311,6 +311,7 @@ class DataService
             'nama_kelas' => $kelas[$q->program_kuliah_id]->nama_program_perkuliahan ?? '',
             'id_pa' => $q->pa_id,
             'dosen_pa' => $dosen[$q->pa_id]['nama_lengkap'] ?? '',
+            'nidn_pa' => !empty(trim($dosen[$q->pa_id]['nidn'] ?? '')) ? $dosen[$q->pa_id]['nidn'] : ($dosen[$q->pa_id]['nik'] ?? ''),
             'isi_biodata' => $q->isi_biodata,
         ];
     }

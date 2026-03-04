@@ -5,7 +5,7 @@
     <div class="card">
         <div class="card-header">
             <div class="table-responsive">
-                <table class="table table-borderless table-sm mb-2">
+                <table class="table table-borderless table-sm mb-2" style="font-weight: bold;">
                     <tbody>
                         <tr>
                             <td style="width: 220px;">Nama Mahasiswa</td>
@@ -38,61 +38,58 @@
 
             <a href="{{ route('krs.create') }}" class="btn btn-success btn-sm me-1"><i class="bx bx-file"></i>Kontrak Mata
                 Kuliah</a>
-            <button id="hubungi_pa" class="btn btn-warning btn-sm me-1"><i class="bx bx-send"></i>Hubungi PA</button>
         </div>
     </div>
-    @foreach ($krs as $key => $value)
-        <div class="card">
-            <div class="card-header d-flex align-items-center">
-                <h6 class="mb-0">Tahun Akademik {{ $key }} - Semester {{ $value['semester'] }}</h6>
-                <div class="ms-auto">
-                    <a href="" class="btn btn-sm btn-primary me-0"><i class="bx bx-printer mr-1"></i> Cetak</a>
-                </div>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-striped table-bordered krsTable" style="width:100%">
-                        <thead>
-                            <tr>
-                                <th style="width: 30px">No</th>
-                                <th style="width: 200px">Hari/Ruang/Jam</th>
-                                <th style="width: 400px">Mata Kuliah</th>
-                                <th>Dosen Pengampu</th>
-                                <th>Kelompok</th>
-                                <th>Persetujuan PA</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($value['krs'] as $item)
-                                <tr>
-                                    <td>{{ $loop->iteration }}</td>
-                                    <td>{{ $item['nama_hari'] }}/{{ $item['ruang_id'] }}<br>
-                                        {{ $item['jam_mulai'] }} - {{ $item['jam_selesai'] }}</td>
-                                    <td>{{ $item['kode_mata_kuliah'] }}<br>
-                                        {{ $item['nama_mata_kuliah'] }}</td>
-                                    <td>{{ $item['dosen_id'] }}</td>
-                                    <td>{{ $item['kelompok'] }}</td>
-                                    <td>{{ $item['persetujuan_pa'] == 'Y' ? 'Disetujui' : 'Menunggu' }}</td>
-                                </tr>
-                            @endforeach
+    <div class="card">
+        <div class="card-body">
+            <div class="mb-3">
+                <h5>Kartu Rencana Studi</h5>
+                @if ($krs['semester'] && $krs['tahun_akademik'])
+                    <h5>Semester {{ $krs['semester'] }} - Tahun Akademik {{ $krs['tahun_akademik'] }}</h5>
+                    <a href="{{ route('krs.print') }}?periode={{ $krs['tahun_akademik'] }}" target="_blank"
+                        class="btn btn-sm btn-primary me-0"><i class="bx bx-printer mr-1"></i> Cetak</a>
+                @endif
 
-                        </tbody>
-                    </table>
-                </div>
             </div>
-            <div class="card-footer bg-white">
-                <div class="table-responsive">
-                    <table class="table table-borderless table-sm mb-2">
-                        <thead>
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered krsTable" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th style="width: 30px">No</th>
+                            <th style="width: 200px">Hari/Ruang/Jam</th>
+                            <th style="width: 400px">Mata Kuliah</th>
+                            <th>Dosen Pengampu</th>
+                            <th>Persetujuan PA</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($krs['krs'] as $item)
                             <tr>
-                                <th style="width: 100px;">Jumlah SKS</th>
-                                <th style="width: 10px;">:</th>
-                                <th>{{ $value['jumlah_sks'] }}</th>
+                                <td>{{ $loop->iteration }}</td>
+                                <td>{{ $item['nama_hari'] }}/{{ $item['ruang_id'] }}<br>
+                                    {{ $item['jam_mulai'] }} - {{ $item['jam_selesai'] }}</td>
+                                <td>{{ $item['kode_mata_kuliah'] }}<br>
+                                    {{ $item['nama_mata_kuliah'] }}</td>
+                                <td>{{ $item['dosen_id'] }}</td>
+                                <td>{{ $item['persetujuan_pa'] == 'Y' ? 'Disetujui' : 'Menunggu' }}</td>
                             </tr>
-                        </thead>
-                    </table>
-                </div>
+                        @endforeach
+
+                    </tbody>
+                </table>
             </div>
         </div>
-    @endforeach
+        <div class="card-footer">
+            <nav aria-label="Page navigation example mb-0">
+                Pilih Semester :
+                <ul class="pagination mb-0">
+                    @foreach ($semester as $key => $item)
+                        <li class="page-item {{ request('periode') == $item ? 'active' : '' }}"><a class="page-link"
+                                href="{{ route('krs.index') }}?periode={{ $item }}">{{ $key + 1 }}</a>
+                        </li>
+                    @endforeach
+                </ul>
+            </nav>
+        </div>
+    </div>
 @endsection

@@ -34,7 +34,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/generate-va', [HomeController::class, 'generateVA'])->name('generate-va');
     Route::resource('jadwal-perkuliahan', JadwalPerkuliahanController::class)->only('index');
     Route::resource('biodata', BiodataController::class);
-    Route::resource('khs', KhsController::class)->only('index', 'show');
+    Route::get('khs.print', [KhsController::class, 'print'])->name('khs.print');
+    Route::resource('khs', KhsController::class)->only('index');
+    Route::get('krs.print', [KrsController::class, 'print'])->name('krs.print');
     Route::resource('krs', KrsController::class)->only('index', 'create', 'store', 'destroy');
     Route::resource('transkrip-nilai', TranskripNilaiController::class);
     Route::resource('pendaftaran-kkn', PendaftaranKKNController::class);

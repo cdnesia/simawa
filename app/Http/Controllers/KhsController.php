@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Khs;
 use App\Services\DataService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
@@ -13,10 +14,10 @@ class KhsController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(DataService $service)
+    public function index(Request $request, DataService $service)
     {
         $npm = auth('web')->user()->npm;
-
+        $periode = $request->query('periode');
         $krsOld = DB::connection('db_siade_old')
             ->table('krs')
             ->where('nim', $npm)
@@ -24,6 +25,7 @@ class KhsController extends Controller
             ->keyBy('JadwalID');
 
         $dataKrs = $service->krs($npm);
+        $semesterKeys = array_keys($dataKrs);
         $flatKrs = collect($dataKrs)
             ->pluck('krs')
             ->flatten(1)
@@ -45,8 +47,16 @@ class KhsController extends Controller
                 }
                 return $item;
             });
+        // dd($dataKrs);
 
-        $d['krs'] = $service->krs($npm);
+        $semesterKeys = array_keys($dataKrs);
+
+        if (!$periode || !preg_match('/^\d{5}$/', $periode)) {
+            $periode = array_key_first($dataKrs);
+        }
+
+        $d['semester'] = $semesterKeys;
+        $d['krs'] = $dataKrs[$periode] ?? ['tahun_akademik' => null, 'semester' => null, 'krs' => []];
         $d['metadata'] = $service->saya($npm);
         return view('khs.view', $d);
     }
@@ -54,48 +64,26 @@ class KhsController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function print(Request $request, DataService $service)
     {
-        //
-    }
+        $periode = $request->query('periode');
+        $npm = auth('web')->user()->npm;
+        $dataKrs = $service->krs($npm);
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
+        if (!$periode || !preg_match('/^\d{5}$/', $periode)) {
+            $periode = array_key_first($dataKrs);
+        }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Khs $khs)
-    {
-        //
-    }
+        $data = [
+            'saya' => $service->saya($npm),
+            'npm' => $npm,
+            'periode' => $periode,
+            'krs' => $dataKrs[$periode] ?? []
+        ];
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Khs $khs)
-    {
-        //
-    }
+        $pdf = Pdf::loadView('khs.print', $data)
+            ->setPaper('A4', 'portrait');
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Khs $khs)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Khs $khs)
-    {
-        //
+        return $pdf->stream('KRS-' . $npm . '-' . $periode . '.pdf');
     }
 }
