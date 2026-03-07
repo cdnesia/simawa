@@ -34,7 +34,7 @@ class KhsController extends Controller
                 $item['id_krs'] = Crypt::decrypt($item['id_krs']);
                 if (isset($krsOld[$item['jadwal_id']])) {
                     $old = $krsOld[$item['jadwal_id']];
-                    if ($old->nilai_angka != $item['nilai_angka']) {
+                    if ($old->nilai_angka > $item['nilai_angka']) {
                         DB::connection('db_siade')->table('tbl_mahasiswa_krs')
                             ->where('id', $item['id_krs'])
                             ->where('npm', $npm)
@@ -47,7 +47,6 @@ class KhsController extends Controller
                 }
                 return $item;
             });
-        // dd($dataKrs);
 
         $semesterKeys = array_keys($dataKrs);
 

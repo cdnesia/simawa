@@ -37,7 +37,7 @@ class AuthController extends Controller
                 return redirect()->intended('/beranda');
             } else {
                 return back()->withErrors([
-                    'email' => 'NPM/Email/password salah.',
+                    'email' => 'NPM dan Password tidak terdaftar.',
                 ]);
             }
         }
@@ -48,7 +48,7 @@ class AuthController extends Controller
 
         if (!$mhs) {
             return back()->withErrors([
-                'email' => 'Akun tidak ditemukan.',
+                'email' => 'NPM dan Password tidak terdaftar.',
             ])->onlyInput('email');
         }
 
@@ -76,6 +76,18 @@ class AuthController extends Controller
     }
 
     public function logout(Request $request)
+    {
+        Auth::guard('web')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect('/login');
+    }
+    public function showResetForm(Request $request)
+    {
+        return view('auth.passwords.reset');
+    }
+    public function resetPassword(Request $request)
     {
         Auth::guard('web')->logout();
         $request->session()->invalidate();

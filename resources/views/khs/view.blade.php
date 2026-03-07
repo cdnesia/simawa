@@ -76,9 +76,9 @@
                         @endforeach
                         <tr>
                             <th colspan="6">
-                                Jumlah SKS : {{ $krs['jumlah_sks'] }} <br>
-                                IP Semester : {{ $krs['metadata']['ips'] }} <br>
-                                IP Kumulatif : {{ $krs['metadata']['ipk'] }} <br>
+                                Jumlah SKS : {{ $krs['jumlah_sks'] ?? 0 }} <br>
+                                IP Semester : {{ $krs['metadata']['ips'] ?? 0 }} <br>
+                                IP Kumulatif : {{ $krs['metadata']['ipk'] ?? 0 }} <br>
                             </th>
                         </tr>
                     </tbody>

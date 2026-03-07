@@ -98,7 +98,7 @@
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item d-flex align-items-center"
-                                    href="https://sso.umjambi.ac.id/realms/sso/login-actions/reset-credentials"><i
+                                    href="{{ route('password.request') }}"><i
                                         class="bx bx-cog fs-5"></i><span>Pengaturan</span></a>
                             </li>
                             <li>

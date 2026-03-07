@@ -50,5 +50,7 @@ Route::middleware('auth')->group(function () {
         return redirect()->away('mailto:ict@umjambi.ac.id?subject=Permintaan Bantuan');
     })->name('bantuan');
 
+    Route::get('/reset-password', [AuthController::class, 'showResetForm'])->name('password.request');
+    Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
