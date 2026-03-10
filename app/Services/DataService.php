@@ -55,6 +55,7 @@ class DataService
                 'mk.kode_mata_kuliah',
                 'mk.nama_mata_kuliah_idn',
                 'mk.sks_mata_kuliah',
+                'mk.semester',
                 'h.nama_hari',
                 'h.id as id_hari',
             )
@@ -66,7 +67,6 @@ class DataService
         ]);
 
         $krs = [];
-        $semester = 1;
         $total_sks_kumulatif = 0;
         $total_bobot_kumulatif = 0;
 
@@ -74,12 +74,16 @@ class DataService
             $ta = $row->kode_tahun_akademik;
             if (!isset($krs[$ta])) {
                 $krs[$ta] = [
-                    'semester' => $semester++,
+                    'semester' => $row->semester,
                     'tahun_akademik' => $ta,
                     'jumlah_sks' => 0,
                     'total_bobot' => 0,
                     'krs' => [],
                 ];
+            }
+
+            if ($krs[$ta]['semester'] != $row->semester) {
+                continue;
             }
 
             $sks = $row->sks_mata_kuliah ?? 0;
@@ -94,6 +98,7 @@ class DataService
             $krs[$ta]['krs'][] = [
                 'id_krs' => Crypt::encrypt($row->id),
                 'nilai_angka' => $row->nilai_angka ?? '',
+                'semester' => $row->semester ?? '',
                 'jadwal_id' => Crypt::encrypt($row->jadwal_id) ?? '',
                 'nilai_huruf' => $row->nilai_huruf ?? '',
                 'nilai_bobot' => $bobot,

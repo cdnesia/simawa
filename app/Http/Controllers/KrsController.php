@@ -21,13 +21,19 @@ class KrsController extends Controller
         $periode = $request->query('periode');
         $npm = auth('web')->user()->npm;
         $dataKrs = $service->krs($npm);
-        $semesterKeys = array_keys($dataKrs);
+
+        $semester = collect($dataKrs)->map(function ($item, $key) {
+            return [
+                'tahun_akademik' => $key,
+                'semester' => $item['semester'] ?? null,
+            ];
+        })->values()->toArray();
 
         if (!$periode || !preg_match('/^\d{5}$/', $periode)) {
             $periode = array_key_first($dataKrs);
         }
 
-        $d['semester'] = $semesterKeys;
+        $d['semester'] = $semester;
         $d['krs'] = $dataKrs[$periode] ?? ['tahun_akademik' => null, 'semester' => null, 'krs' => []];
         $d['metadata'] = $service->saya($npm);
         return view('krs.view', $d);

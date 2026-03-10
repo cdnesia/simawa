@@ -85,7 +85,7 @@
                 <ul class="pagination mb-0">
                     @foreach ($semester as $key => $item)
                         <li class="page-item {{ request('periode') == $item ? 'active' : '' }}"><a class="page-link"
-                                href="{{ route('krs.index') }}?periode={{ $item }}">{{ $key + 1 }}</a>
+                                href="{{ route('krs.index') }}?periode={{ $item['tahun_akademik'] }}">{{ $item['semester'] }}</a>
                         </li>
                     @endforeach
                 </ul>

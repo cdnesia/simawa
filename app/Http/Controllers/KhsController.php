@@ -25,7 +25,14 @@ class KhsController extends Controller
             ->keyBy('JadwalID');
 
         $dataKrs = $service->krs($npm);
-        $semesterKeys = array_keys($dataKrs);
+
+        $semester = collect($dataKrs)->map(function ($item, $key) {
+            return [
+                'tahun_akademik' => $key,
+                'semester' => $item['semester'] ?? null,
+            ];
+        })->values()->toArray();
+
         $flatKrs = collect($dataKrs)
             ->pluck('krs')
             ->flatten(1)
@@ -48,13 +55,11 @@ class KhsController extends Controller
                 return $item;
             });
 
-        $semesterKeys = array_keys($dataKrs);
-
         if (!$periode || !preg_match('/^\d{5}$/', $periode)) {
             $periode = array_key_first($dataKrs);
         }
 
-        $d['semester'] = $semesterKeys;
+        $d['semester'] = $semester;
         $d['krs'] = $dataKrs[$periode] ?? ['tahun_akademik' => null, 'semester' => null, 'krs' => []];
         $d['metadata'] = $service->saya($npm);
         return view('khs.view', $d);
