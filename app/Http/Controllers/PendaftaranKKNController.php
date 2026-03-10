@@ -8,6 +8,7 @@ use App\Models\PendaftaranKKN;
 use App\Services\DataService;
 use App\Services\PaymentService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class PendaftaranKKNController extends Controller
 {
@@ -22,7 +23,14 @@ class PendaftaranKKNController extends Controller
      */
     public function index(DataService $dataService)
     {
-        return view('kkn.view');
+        $npm = auth('web')->user()->npm;
+        $d['kkn'] = DB::connection('db_siade')->table('tbl_pendaftaran_kegiatan_mahasiswa  as tpkm')
+        ->join('tbl_kegiatan_mahasiswa as tkm','tpkm.kegiatan_mahasiswa_id','tkm.id')
+        ->where('npm', $npm)
+        ->select('tpkm.*','tkm.nama_kegiatan')
+        ->get();
+        // dd($d);
+        return view('kkn.view',$d);
     }
 
     /**
@@ -93,12 +101,12 @@ class PendaftaranKKNController extends Controller
 
             $persyaratan = KegiatanMahasiswa::findOrFail($id);
 
-            if ($total_sks < $persyaratan->minimal_sks) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Gagal mendaftar karena tidak memenuhi persyaratan SKS.'
-                ], 422);
-            }
+            // if ($total_sks < $persyaratan->minimal_sks) {
+            //     return response()->json([
+            //         'success' => false,
+            //         'message' => 'Gagal mendaftar karena tidak memenuhi persyaratan SKS.'
+            //     ], 422);
+            // }
             // if ($jumlahD + $jumlahKosong > $persyaratan->maksimal_nilai_d) {
             //     return response()->json([
             //         'success' => false,

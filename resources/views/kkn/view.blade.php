@@ -16,11 +16,20 @@
                             <th width="30px">No</th>
                             <th>Jenis KKN</th>
                             <th>Tanggal Pendaftaran</th>
-                            <th>Status</th>
+                            <th>Biaya Pendaftaran</th>
                             <th width="50px">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
+                        @foreach ($kkn as $item)
+                            <tr>
+                                <td>{{ $loop->iteration }}</td>
+                                <td>{{ $item->nama_kegiatan }}</td>
+                                <td>{{ $item->tanggal_pendaftaran }}</td>
+                                <td>{{ $item->biaya_pendaftaran }}</td>
+                                <td></td>
+                            </tr>
+                        @endforeach
                     </tbody>
                 </table>
             </div>
