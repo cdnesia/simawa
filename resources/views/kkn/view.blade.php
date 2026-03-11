@@ -17,7 +17,6 @@
                             <th>Jenis KKN</th>
                             <th>Tanggal Pendaftaran</th>
                             <th>Biaya Pendaftaran</th>
-                            <th width="50px">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -27,7 +26,6 @@
                                 <td>{{ $item->nama_kegiatan }}</td>
                                 <td>{{ $item->tanggal_pendaftaran }}</td>
                                 <td>{{ $item->biaya_pendaftaran }}</td>
-                                <td></td>
                             </tr>
                         @endforeach
                     </tbody>
