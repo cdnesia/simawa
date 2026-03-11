@@ -102,20 +102,27 @@ class PendaftaranKKNController extends Controller
 
             $persyaratan = KegiatanMahasiswa::findOrFail($id);
 
-            // if ($total_sks < $persyaratan->minimal_sks) {
-            //     return response()->json([
-            //         'success' => false,
-            //         'message' => 'Gagal mendaftar karena tidak memenuhi persyaratan SKS.'
-            //     ], 422);
-            // }
-            // if ($jumlahD + $jumlahKosong > $persyaratan->maksimal_nilai_d) {
-            //     return response()->json([
-            //         'success' => false,
-            //         'message' => 'Gagal mendaftar karena tidak memenuhi persyaratan nilai D.'
-            //     ], 422);
-            // }
+            if ($total_sks < $persyaratan->minimal_sks) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal mendaftar karena tidak memenuhi persyaratan SKS.'
+                ], 422);
+            }
+            if ($jumlahD + $jumlahKosong > $persyaratan->maksimal_nilai_d) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal mendaftar karena tidak memenuhi persyaratan nilai D.'
+                ], 422);
+            }
 
-            $paymentService->generateTagihanKKN($id);
+            $generate = $paymentService->generateTagihanKKN($id);
+            if (!$generate['success']) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $generate['message'] ?? 'Gagal membuat tagihan'
+                ], 400);
+            }
+
 
             PendaftaranKkn::insert([
                 'npm' => auth('web')->user()->mahasiswa->npm,
