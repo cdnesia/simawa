@@ -8,6 +8,7 @@ use App\Models\PendaftaranKKN;
 use App\Services\DataService;
 use App\Services\PaymentService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 
 class PendaftaranKKNController extends Controller
@@ -98,7 +99,7 @@ class PendaftaranKKNController extends Controller
             $total_sks = $flatKrs->sum('sks_matakuliah');
             $jumlahD = $flatKrs->where('nilai_huruf', 'D')->count();
             $jumlahKosong = $flatKrs->where('nilai_huruf', '')->count();
-            $id = decrypt($request->id);
+            $id = Crypt::decrypt($request->id);
 
             $persyaratan = KegiatanMahasiswa::findOrFail($id);
 
