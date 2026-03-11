@@ -25,12 +25,11 @@ class PendaftaranKKNController extends Controller
     {
         $npm = auth('web')->user()->npm;
         $d['kkn'] = DB::connection('db_siade')->table('tbl_pendaftaran_kegiatan_mahasiswa  as tpkm')
-        ->join('tbl_kegiatan_mahasiswa as tkm','tpkm.kegiatan_mahasiswa_id','tkm.id')
-        ->where('npm', $npm)
-        ->select('tpkm.*','tkm.nama_kegiatan')
-        ->get();
-        // dd($d);
-        return view('kkn.view',$d);
+            ->join('tbl_kegiatan_mahasiswa as tkm', 'tpkm.kegiatan_mahasiswa_id', 'tkm.id')
+            ->where('npm', $npm)
+            ->select('tpkm.*', 'tkm.nama_kegiatan')
+            ->get();
+        return view('kkn.view', $d);
     }
 
     /**
@@ -40,6 +39,7 @@ class PendaftaranKKNController extends Controller
     {
         $kodeProdi = auth('web')->user()->mahasiswa->kode_program_studi;
         $tahunAngkatan = auth('web')->user()->mahasiswa->tahun_angkatan;
+        $kelasPerkuliahan = auth('web')->user()->mahasiswa->program_kuliah_id;
 
         $cekJadwalKKN = $dataService->JadwalKKN();
         if (!$cekJadwalKKN) {
@@ -48,6 +48,7 @@ class PendaftaranKKNController extends Controller
         $d['jadwal_kkn'] = true;
         $d['data'] = null;
         $d['persyaratan'] = KegiatanMahasiswa::where('tipe', 'KKN')
+            ->where('kelas_perkuliahan_id', $kelasPerkuliahan)
             ->whereJsonContains('kode_program_studi', $kodeProdi)
             ->whereJsonContains('tahun_angkatan', $tahunAngkatan)
             ->get()
