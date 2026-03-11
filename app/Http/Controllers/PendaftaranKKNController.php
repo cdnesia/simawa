@@ -116,6 +116,9 @@ class PendaftaranKKNController extends Controller
             }
 
             $generate = $paymentService->generateTagihanKKN($id);
+
+            dd($generate);
+
             if (!$generate['success']) {
                 return response()->json([
                     'success' => false,
