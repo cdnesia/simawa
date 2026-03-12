@@ -41,8 +41,18 @@ class HomeController extends Controller
         $cekTagihanSekarang = $this->payment->generateTagihanSekarang();
         $ambilTagihanTerhutang = $this->payment->ambilTagihanTerhutang();
         if ($cekBeasiswa) {
-            $d['tagihan_terhutang'] = [];
-            $d['tagihan_sekarang'] = [];
+            $ambilTagihanTerhutangSelainSPP = collect($ambilTagihanTerhutang)
+                ->filter(function ($item) {
+                    return in_array($item['jenis_tagihan'], ['KKN']);
+                });
+            $d['tagihan_terhutang'] = $ambilTagihanTerhutangSelainSPP;
+
+            $cekTagihanSelainSPP = collect($cekTagihanSekarang)
+                ->filter(function ($item) {
+                    return in_array($item['jenis_tagihan'], ['KKN']);
+                });
+
+            $d['tagihan_sekarang'] = $cekTagihanSelainSPP;
         } else {
             $d['tagihan_terhutang'] = $ambilTagihanTerhutang;
             $d['tagihan_sekarang'] = $cekTagihanSekarang;
