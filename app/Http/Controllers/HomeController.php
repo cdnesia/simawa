@@ -38,6 +38,7 @@ class HomeController extends Controller
         $d['ips'] = $ips;
 
         $cekBeasiswa = $service->cekBeasiswa();
+
         $cekTagihanSekarang = $this->payment->generateTagihanSekarang();
         $ambilTagihanTerhutang = $this->payment->ambilTagihanTerhutang();
         if ($cekBeasiswa) {

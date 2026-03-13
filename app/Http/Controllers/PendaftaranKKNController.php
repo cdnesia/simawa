@@ -96,6 +96,15 @@ class PendaftaranKKNController extends Controller
                 ->pluck('krs')
                 ->flatten(1);
 
+            $existsMkKKN = $flatKrs->contains('tipe_mata_kuliah', 1);
+
+            if (!$existsMkKKN) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal mendaftar karena belum kontrak Matakuliah KKN.'
+                ], 422);
+            }
+
             $total_sks = $flatKrs->sum('sks_matakuliah');
             $jumlahD = $flatKrs->where('nilai_huruf', 'D')->count();
             $jumlahKosong = $flatKrs->where('nilai_huruf', '')->count();
