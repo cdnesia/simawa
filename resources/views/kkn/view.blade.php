@@ -25,7 +25,7 @@
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $item->nama_kegiatan }}</td>
                                 <td>{{ $item->tanggal_pendaftaran }}</td>
-                                <td>{{ $item->biaya_pendaftaran }}</td>
+                                <td>Rp. {{ number_format($item->biaya_pendaftaran ?? 0, 0, ',', '.') }}</td>
                             </tr>
                         @endforeach
                     </tbody>
