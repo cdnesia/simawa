@@ -81,6 +81,9 @@
                 </table>
             </div>
         </div>
+        <div class="card-footer">
+            Tata Cara Pembayaran ke Bank BSI <a href="{{ asset('assets/panduan/tata-cara-pembayaran-bsi.pdf') }}">Klik di sini</a>
+        </div>
     </div>
     <div class="row">
         <div class="col-md-4">
