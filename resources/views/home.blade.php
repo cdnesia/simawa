@@ -82,7 +82,8 @@
             </div>
         </div>
         <div class="card-footer">
-            Tata Cara Pembayaran ke Bank BSI <a href="{{ asset('assets/panduan/tata-cara-pembayaran-bsi.pdf') }}">Klik di sini</a>
+            <img src="{{ asset('assets/panduan/bsi.png') }}" alt="" width="120px"> <br>
+            Panduan pembayaran BSI <a href="{{ asset('assets/panduan/tata-cara-pembayaran-bsi.pdf') }}">Klik di sini</a>
         </div>
     </div>
     <div class="row">
