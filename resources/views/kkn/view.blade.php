@@ -14,6 +14,7 @@
                     <thead>
                         <tr>
                             <th width="30px">No</th>
+                            <th>Nomor Tagihan</th>
                             <th>Jenis KKN</th>
                             <th>Tanggal Pendaftaran</th>
                             <th>Biaya Pendaftaran</th>
@@ -23,6 +24,7 @@
                         @foreach ($kkn as $item)
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
+                                <td><a href="{{ route('home') }}">Lihat Virtual Account</a></td>
                                 <td>{{ $item->nama_kegiatan }}</td>
                                 <td>{{ $item->tanggal_pendaftaran }}</td>
                                 <td>Rp. {{ number_format($item->biaya_pendaftaran ?? 0, 0, ',', '.') }}</td>
