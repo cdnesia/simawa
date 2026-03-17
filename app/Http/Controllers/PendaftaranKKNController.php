@@ -86,28 +86,27 @@ class PendaftaranKKNController extends Controller
     {
         try {
             $kodeProdi = auth('web')->user()->mahasiswa->kode_program_studi;
+            $npm = auth('web')->user()->mahasiswa->npm;
             $tahunAktif = $dataService->tahunAkademikAktif($kodeProdi);
-            $krs = $dataService->Krs(auth('web')->user()->mahasiswa->npm);
+            $krs = collect($dataService->Krs($npm));
 
-            $flatKrs = collect($krs)
-                ->reject(function ($semester, $tahun) use ($tahunAktif) {
-                    return $tahun == $tahunAktif;
-                })
-                ->pluck('krs')
-                ->flatten(1);
+            $krsRaw = $krs->pluck('krs')->flatten(1);
 
-            $existsMkKKN = $flatKrs->contains('tipe_mata_kuliah', 1);
-
-            if (!$existsMkKKN) {
+            if (!$krsRaw->contains('tipe_mata_kuliah', 1)) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Gagal mendaftar karena belum kontrak Matakuliah KKN.'
                 ], 422);
             }
 
+            $flatKrs = $krs
+                ->reject(fn($item, $tahun) => $tahun == $tahunAktif)
+                ->pluck('krs')
+                ->flatten(1);
+
             $total_sks = $flatKrs->sum('sks_matakuliah');
             $jumlahD = $flatKrs->where('nilai_huruf', 'D')->count();
-            $jumlahKosong = $flatKrs->where('nilai_huruf', '')->count();
+            $jumlahKosong = $flatKrs->filter(fn($item) => empty($item['nilai_huruf']))->count();
             $id = Crypt::decrypt($request->id);
 
             $persyaratan = KegiatanMahasiswa::findOrFail($id);
@@ -118,7 +117,7 @@ class PendaftaranKKNController extends Controller
                     'message' => 'Gagal mendaftar karena tidak memenuhi persyaratan SKS.'
                 ], 422);
             }
-            if ($jumlahD + $jumlahKosong > $persyaratan->maksimal_nilai_d) {
+            if (($jumlahD + $jumlahKosong) > $persyaratan->maksimal_nilai_d) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Gagal mendaftar karena tidak memenuhi persyaratan nilai D.'
