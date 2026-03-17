@@ -46,7 +46,7 @@
 </style>
 
 <body>
-    <table style="width: 100%; margin-top: -20px">
+    <table style="width: 100%; margin-top: -10px">
         <tr>
             <td style="width: 80px"><img src="{{ public_path('assets/images/favicon-32x32.png') }}" width="80px"></td>
             <td style="text-align: center">
@@ -93,15 +93,11 @@
     <table class="table-krs">
         <thead>
             <tr>
-                <th rowspan="2" width="5%">No</th>
-                <th rowspan="2" width="12%">Kode</th>
-                <th rowspan="2">Mata Kuliah</th>
-                <th rowspan="2" width="8%">SKS</th>
-                <th colspan="2">Jadwal</th>
-            </tr>
-            <tr>
-                <th width="12%">Hari</th>
-                <th width="20%">Jam</th>
+                <th width="5%">No</th>
+                <th width="12%">Kode</th>
+                <th>Mata Kuliah</th>
+                <th width="8%">SKS</th>
+                <th>Jadwal</th>
             </tr>
         </thead>
         <tbody>
@@ -114,8 +110,7 @@
                     <td class="text-center">{{ $item['kode_mata_kuliah'] }}</td>
                     <td>{{ $item['nama_mata_kuliah'] }}</td>
                     <td class="text-center">{{ $item['sks_matakuliah'] }}</td>
-                    <td class="text-center">{{ $item['nama_hari'] }}</td>
-                    <td class="text-center">
+                    <td class="text-center">{{ $item['nama_hari'] }},
                         {{ $item['jam_mulai'] }} - {{ $item['jam_selesai'] }}
                     </td>
                 </tr>
@@ -123,7 +118,7 @@
             <tr>
                 <td colspan="3" class="text-right"><strong>Total SKS</strong></td>
                 <td class="text-center"><strong>{{ $totalSks }}</strong></td>
-                <td colspan="2"></td>
+                <td></td>
             </tr>
         </tbody>
     </table>

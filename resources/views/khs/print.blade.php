@@ -46,7 +46,7 @@
 </style>
 
 <body>
-    <table style="width: 100%; margin-top: -20px">
+    <table style="width: 100%; margin-top: -10px">
         <tr>
             <td style="width: 80px"><img src="{{ public_path('assets/images/favicon-32x32.png') }}" width="80px"></td>
             <td style="text-align: center">
