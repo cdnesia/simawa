@@ -87,12 +87,21 @@ class PendaftaranKKNController extends Controller
         try {
             $kodeProdi = auth('web')->user()->mahasiswa->kode_program_studi;
             $npm = auth('web')->user()->mahasiswa->npm;
+
             $tahunAktif = $dataService->tahunAkademikAktif($kodeProdi);
             $krs = collect($dataService->Krs($npm));
 
             $krsRaw = $krs->pluck('krs')->flatten(1);
 
-            if (!$krsRaw->contains('tipe_mata_kuliah', 1)) {
+            $dataSaya = $dataService->saya($npm);
+            $id_fakultas = $dataSaya['id_fakultas'] ?? null;
+            $excludeFakultas = [12];
+
+            if (
+                !in_array($id_fakultas, $excludeFakultas) &&
+                $krsRaw->where('tipe_mata_kuliah', 1)->isEmpty()
+            ) {
+
                 return response()->json([
                     'success' => false,
                     'message' => 'Gagal mendaftar karena belum kontrak Matakuliah KKN.'
