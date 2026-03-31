@@ -313,7 +313,7 @@ class DataService
             'tahun_angkatan' => $q->tahun_angkatan,
             'kode_program_studi' => $q->kode_program_studi,
             'nama_program_studi' => $prodis[$q->kode_program_studi]->nama_program_studi_idn ?? '',
-            'id_fakultas' => $prodis[$q->kode_program_studi]->id ?? '',
+            'id_fakultas' => $prodis[$q->kode_program_studi]->fakultas_id ?? '',
             'nama_fakultas' => $prodis[$q->kode_program_studi]->nama_fakultas_idn ?? '',
             'id_kelas' => $q->program_kuliah_id,
             'nama_kelas' => $kelas[$q->program_kuliah_id]->nama_program_perkuliahan ?? '',

@@ -95,7 +95,10 @@ class PendaftaranKKNController extends Controller
 
             $dataSaya = $dataService->saya($npm);
             $id_fakultas = $dataSaya['id_fakultas'] ?? null;
-            $excludeFakultas = [12];
+
+            dd($id_fakultas);
+
+            $excludeFakultas = [2];
 
             if (
                 !in_array($id_fakultas, $excludeFakultas) &&
