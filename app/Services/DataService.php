@@ -123,8 +123,8 @@ class DataService
                     'sks_matakuliah' => $sks,
                     'jam_mulai' => $row['jadwal']['jam_mulai'] ?? '',
                     'jam_selesai' => $row['jadwal']['jam_selesai'] ?? '',
-                    'dosen_id' => $dosen[$row->jadwal->dosen_id]['nama_lengkap'] ?? '',
-                    'ruang_id' => $ruang[$row->jadwal->ruang_id]['nama'] ?? '',
+                    'dosen_id' => $dosen[$row->jadwal?->dosen_id]['nama_lengkap'] ?? '',
+                    'ruang_id' => $ruang[$row->jadwal?->ruang_id]['nama'] ?? '',
                     'kelompok' => $row['jadwal']['kelompok'] ?? '',
                     'hari' => $row['hari']['nama_hari'] ?? '',
                 ];
