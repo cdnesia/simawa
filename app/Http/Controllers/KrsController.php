@@ -29,9 +29,11 @@ class KrsController extends Controller
             ];
         })->values()->toArray();
 
+
         if (!$periode || !preg_match('/^\d{5}$/', $periode)) {
             $periode = array_key_first($dataKrs);
         }
+
 
         $d['semester'] = $semester;
         $d['krs'] = $dataKrs[$periode] ?? ['tahun_akademik' => null, 'semester' => null, 'krs' => []];
@@ -131,6 +133,8 @@ class KrsController extends Controller
                     'message' => 'Mata kuliah sudah disetujui PA dan tidak dapat dihapus'
                 ], 403);
             }
+
+            dd($krs);
 
             Krs::where('id', $krs->id)
                 ->delete();

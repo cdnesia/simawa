@@ -33,27 +33,6 @@ class KhsController extends Controller
             ];
         })->values()->toArray();
 
-        $flatKrs = collect($dataKrs)
-            ->pluck('krs')
-            ->flatten(1)
-            ->map(function ($item) use ($krsOld, $npm) {
-                $item['jadwal_id'] = Crypt::decrypt($item['jadwal_id']);
-                $item['id_krs'] = Crypt::decrypt($item['id_krs']);
-                if (isset($krsOld[$item['jadwal_id']])) {
-                    $old = $krsOld[$item['jadwal_id']];
-                    if ($old->nilai_angka > $item['nilai_angka']) {
-                        DB::connection('db_siade')->table('tbl_mahasiswa_krs')
-                            ->where('id', $item['id_krs'])
-                            ->where('npm', $npm)
-                            ->update([
-                                'nilai_angka' => $old->nilai_angka,
-                                'nilai_huruf' => $old->nilai_huruf,
-                                'nilai_bobot' => $old->nilai_bobot,
-                            ]);
-                    }
-                }
-                return $item;
-            });
 
         if (!$periode || !preg_match('/^\d{5}$/', $periode)) {
             $periode = array_key_first($dataKrs);

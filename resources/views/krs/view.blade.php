@@ -66,7 +66,7 @@
                         @foreach ($krs['krs'] as $item)
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
-                                <td>{{ $item['nama_hari'] }}/{{ $item['ruang_id'] }}<br>
+                                <td>{{ $item['hari'] }}/{{ $item['ruang_id'] }}<br>
                                     {{ $item['jam_mulai'] }} - {{ $item['jam_selesai'] }}</td>
                                 <td>{{ $item['kode_mata_kuliah'] }}<br>
                                     {{ $item['nama_mata_kuliah'] }}</td>

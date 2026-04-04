@@ -15,23 +15,41 @@ class Krs extends Model
         return $this->belongsTo(JadwalPerkuliahan::class, 'jadwal_id', 'id');
     }
 
-    public function mataKuliah()
+    public function mataKuliahJadwal()
     {
-        return DB::connection('db_siade')
-            ->table('master_kurikulum_matakuliah')
-            ->join('tbl_jadwal_perkuliahan', 'tbl_jadwal_perkuliahan.mata_kuliah_id', '=', 'master_kurikulum_matakuliah.id')
-            ->where('tbl_jadwal_perkuliahan.id', $this->jadwal_id)
-            ->select('master_kurikulum_matakuliah.*')
-            ->first();
+        return $this->hasOneThrough(
+            KurikulumMataKuliah::class,
+            JadwalPerkuliahan::class,
+            'id',
+            'id',
+            'jadwal_id',
+            'mata_kuliah_id'
+        );
+    }
+
+    public function mataKuliahLangsung()
+    {
+        return $this->belongsTo(KurikulumMataKuliah::class, 'mata_kuliah_id', 'id');
     }
 
     public function hari()
     {
-        return DB::connection('db_siade')
-            ->table('master_hari')
-            ->join('tbl_jadwal_perkuliahan', 'tbl_jadwal_perkuliahan.hari_id', '=', 'master_hari.id')
-            ->where('tbl_jadwal_perkuliahan.id', $this->jadwal_id)
-            ->select('master_hari.*')
-            ->first();
+        return $this->hasOneThrough(
+            Hari::class,
+            JadwalPerkuliahan::class,
+            'id',
+            'id',
+            'jadwal_id',
+            'hari_id'
+        );
+    }
+
+    public function getMataKuliahAttribute()
+    {
+        if ($this->jadwal_id == 0) {
+            return $this->mataKuliahLangsung;
+        }
+
+        return $this->mataKuliahJadwal;
     }
 }

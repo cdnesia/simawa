@@ -21,6 +21,23 @@ class DataService
     {
         //
     }
+    public function expandTerms(int $start, int $end): array
+    {
+        $y  = intdiv($start, 10);
+        $s  = $start % 10;
+        $ye = intdiv($end,   10);
+        $se = $end   % 10;
+        $out = [];
+        while ($y < $ye || ($y === $ye && $s <= $se)) {
+            $out[] = $y * 10 + $s;
+            $s++;
+            if ($s > 2) {
+                $s = 1;
+                $y++;
+            }
+        }
+        return $out;
+    }
     public function tahunAkademikAktif($kodeProdi = null)
     {
         $today = Carbon::today()->toDateString();
@@ -34,103 +51,87 @@ class DataService
     }
     public function krs($npm = null, $tahunAkademik = null)
     {
-        $dosen = collect($this->dataDosen())->keyBy('id');
-        $ruang = collect($this->dataRuang())->keyBy('id');
-        $krsRaw = DB::connection('db_siade')
-            ->table('tbl_mahasiswa_krs as k')
-            ->leftJoin('tbl_jadwal_perkuliahan as j', 'k.jadwal_id', '=', 'j.id')
-            ->leftJoin('master_kurikulum_matakuliah as mk', 'j.mata_kuliah_id', '=', 'mk.id')
-            ->leftJoin('master_hari as h', 'j.hari_id', '=', 'h.id')
-            ->where('k.npm', $npm)
-            ->orderBy('k.kode_tahun_akademik')
-            ->orderBy('h.id')
-            ->select(
-                'k.*',
-                'j.jam_mulai',
-                'j.jam_selesai',
-                'j.dosen_id',
-                'j.ruang_id',
-                'j.kelompok',
-                'k.jadwal_id',
-                'mk.kode_mata_kuliah',
-                'mk.nama_mata_kuliah_idn',
-                'mk.sks_mata_kuliah',
-                'mk.mata_kuliah_tipe',
-                'mk.semester',
-                'h.nama_hari',
-                'h.id as id_hari',
-            )
+        $npm = $npm;
+        $krsRaw = KRS::with([
+            'jadwal',
+            'mataKuliahJadwal',
+            'mataKuliahLangsung',
+            'hari'
+        ])
+            ->where('npm', $npm)
             ->get();
 
         $krsRaw = $krsRaw->sortBy([
             fn($a, $b) => $a->kode_tahun_akademik <=> $b->kode_tahun_akademik,
-            fn($b, $a) => ($a->nama_hari ?? '') <=> ($b->nama_hari ?? '')
+            fn($b, $a) => ($a->hari->nama_hari ?? '') <=> ($b->hari->nama_hari ?? '')
         ]);
 
         $krs = [];
         $total_sks_kumulatif = 0;
         $total_bobot_kumulatif = 0;
 
-        foreach ($krsRaw as $row) {
-            $ta = $row->kode_tahun_akademik;
-            if (!isset($krs[$ta])) {
-                $krs[$ta] = [
-                    'semester' => $row->semester,
-                    'tahun_akademik' => $ta,
-                    'jumlah_sks' => 0,
-                    'total_bobot' => 0,
-                    'krs' => [],
+        $mahasiswa = MasterMahasiswa::where('npm', $npm)->firstOrFail();
+        $tahun_angkatan = $mahasiswa->tahun_angkatan;
+        $kode_program_studi = $mahasiswa->kode_program_studi;
+        $tahunAkademikAktif = $this->tahunAkademikAktif($kode_program_studi) ?? $tahun_angkatan;
+        $tahunAkademikDitempuh = $this->expandTerms($tahun_angkatan, $tahunAkademikAktif);
+
+        foreach ($tahunAkademikDitempuh as $key => $value) {
+            if (!isset($krs[$value])) {
+                $krs[$value] = [];
+                $krs[$value]['semester'] = $key + 1;
+                $krs[$value]['tahun_akademik'] = '';
+                $krs[$value]['jumlah_sks'] = 0;
+                $krs[$value]['total_bobot'] = 0;
+                $krs[$value]['krs'] = [];
+                $krs[$value]['jumlah_sks'] = 0;
+                $krs[$value]['total_bobot'] = 0;
+                $krs[$value]['metadata'] = [
+                    'ips' => 0,
+                    'ipk' => 0,
                 ];
             }
+            foreach ($krsRaw as $row) {
+                $ta = $row['kode_tahun_akademik'];
+                if ($value !== (int) $ta) {
+                    continue;
+                }
 
-            if ($krs[$ta]['semester'] != $row->semester) {
-                continue;
+                $krs[$ta]['tahun_akademik'] = $ta;
+
+                $sks = $row['matakuliah']['sks_mata_kuliah'] ?? 0;
+                $bobot = $row['nilai_bobot'] ?? 0;
+
+                $krs[$ta]['jumlah_sks'] += $sks;
+                $krs[$ta]['total_bobot'] += $bobot * $sks;
+
+                $total_sks_kumulatif += $sks;
+                $total_bobot_kumulatif += $bobot * $sks;
+
+                $krs[$ta]['krs'][] = [
+                    'encrypted_id' => Crypt::encrypt($row['id']),
+                    'nilai_angka' => $row['nilai_angka'] ?? '',
+                    'nilai_huruf' => $row['nilai_huruf'] ?? '',
+                    'nilai_bobot' => $bobot,
+                    'persetujuan_pa' => $row['persetujuan_pa'] ?? '',
+                    'lulus' => $row['lulus'] ?? '',
+                    'edome' => $row['edome'] ?? '',
+                    'kode_mata_kuliah' => $row['matakuliah']['kode_mata_kuliah'] ?? '',
+                    'nama_mata_kuliah' => $row['matakuliah']['nama_mata_kuliah_idn'] ?? '',
+                    'sks_matakuliah' => $sks,
+                    'jam_mulai' => $row['jadwal']['jam_mulai'] ?? '',
+                    'jam_selesai' => $row['jadwal']['jam_selesai'] ?? '',
+                    'dosen_id' => $row['jadwal']['dosen_id'] ?? '',
+                    'ruang_id' => $row['jadwal']['ruang_id'] ?? '',
+                    'kelompok' => $row['jadwal']['kelompok'] ?? '',
+                    'hari' => $row['hari']['nama_hari'] ?? '',
+                ];
+
+                $krs[$ta]['metadata'] = [
+                    'ips' => $krs[$ta]['jumlah_sks'] ? round($krs[$ta]['total_bobot'] / $krs[$ta]['jumlah_sks'], 2) : 0,
+                    'ipk' => $total_sks_kumulatif ? round($total_bobot_kumulatif / $total_sks_kumulatif, 2) : 0,
+                ];
             }
-
-            $sks = $row->sks_mata_kuliah ?? 0;
-            $bobot = $row->nilai_bobot ?? 0;
-
-            $krs[$ta]['jumlah_sks'] += $sks;
-            $krs[$ta]['total_bobot'] += $bobot * $sks;
-
-            $total_sks_kumulatif += $sks;
-            $total_bobot_kumulatif += $bobot * $sks;
-
-            $krs[$ta]['krs'][] = [
-                'id_krs' => Crypt::encrypt($row->id),
-                'nilai_angka' => $row->nilai_angka ?? '',
-                'semester' => $row->semester ?? '',
-                'jadwal_id' => Crypt::encrypt($row->jadwal_id) ?? '',
-                'nilai_huruf' => $row->nilai_huruf ?? '',
-                'nilai_bobot' => $bobot,
-                'persetujuan_pa' => $row->persetujuan_pa ?? '',
-                'lulus' => $row->lulus ?? '',
-                'edome' => $row->edome ?? '',
-                'kode_mata_kuliah' => $row->kode_mata_kuliah ?? '',
-                'nama_mata_kuliah' => $row->nama_mata_kuliah_idn ?? '',
-                'tipe_mata_kuliah' => $row->mata_kuliah_tipe ?? '',
-                'sks_matakuliah' => $sks,
-                'jam_mulai' => $row->jam_mulai ?? '',
-                'jam_selesai' => $row->jam_selesai ?? '',
-                'dosen_id' => $dosen[$row->dosen_id]['nama_lengkap'] ?? '',
-                'ruang_id' => $ruang[$row->ruang_id]['nama'] ?? '',
-                'kelompok' => $row->kelompok ?? '',
-                'nama_hari' => $row->nama_hari ?? '',
-            ];
-
-            $krs[$ta]['metadata'] = [
-                'ips' => $krs[$ta]['jumlah_sks']
-                    ? round($krs[$ta]['total_bobot'] / $krs[$ta]['jumlah_sks'], 2)
-                    : 0,
-                'ipk' => $total_sks_kumulatif
-                    ? round($total_bobot_kumulatif / $total_sks_kumulatif, 2)
-                    : 0,
-            ];
-        }
-        if ($tahunAkademik) {
-            return [
-                $tahunAkademik => $krs[$tahunAkademik] ?? []
-            ];
         }
 
         return $krs;
