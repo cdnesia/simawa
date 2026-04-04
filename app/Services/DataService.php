@@ -52,6 +52,8 @@ class DataService
     public function krs($npm = null, $tahunAkademik = null)
     {
         $npm = $npm;
+        $dosen = collect($this->dataDosen())->keyBy('id');
+        $ruang = collect($this->dataRuang())->keyBy('id');
         $krsRaw = KRS::with([
             'jadwal',
             'mataKuliahJadwal',
@@ -121,8 +123,8 @@ class DataService
                     'sks_matakuliah' => $sks,
                     'jam_mulai' => $row['jadwal']['jam_mulai'] ?? '',
                     'jam_selesai' => $row['jadwal']['jam_selesai'] ?? '',
-                    'dosen_id' => $row['jadwal']['dosen_id'] ?? '',
-                    'ruang_id' => $row['jadwal']['ruang_id'] ?? '',
+                    'dosen_id' => $dosen[$row->dosen_id]['nama_lengkap'] ?? '',
+                    'ruang_id' => $ruang[$row->ruang_id]['nama'] ?? '',
                     'kelompok' => $row['jadwal']['kelompok'] ?? '',
                     'hari' => $row['hari']['nama_hari'] ?? '',
                 ];
