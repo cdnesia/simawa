@@ -112,6 +112,7 @@ class DataService
 
                 $krs[$ta]['krs'][] = [
                     'encrypted_id' => Crypt::encrypt($row['id']),
+                    'jadwal_id' => Crypt::encrypt($row['jadwal_id']),
                     'nilai_angka' => $row['nilai_angka'] ?? '',
                     'nilai_huruf' => $row['nilai_huruf'] ?? '',
                     'nilai_bobot' => $bobot,
@@ -120,6 +121,7 @@ class DataService
                     'edome' => $row['edome'] ?? '',
                     'kode_mata_kuliah' => $row['matakuliah']['kode_mata_kuliah'] ?? '',
                     'nama_mata_kuliah' => $row['matakuliah']['nama_mata_kuliah_idn'] ?? '',
+                    'tipe_mata_kuliah' => $row['matakuliah']['mata_kuliah_tipe'] ?? '',
                     'sks_matakuliah' => $sks,
                     'jam_mulai' => $row['jadwal']['jam_mulai'] ?? '',
                     'jam_selesai' => $row['jadwal']['jam_selesai'] ?? '',

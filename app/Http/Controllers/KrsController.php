@@ -9,6 +9,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class KrsController extends Controller
@@ -58,20 +59,18 @@ class KrsController extends Controller
 
                 $krs = collect($service->krs($npm, $TAAktif))->values();
 
-                $d['existing'] = collect($krs->first()['krs'] ?? [])
+                $d['existing'] = $krs
+                    ->pluck('krs')
+                    ->flatten(1)
                     ->pluck('jadwal_id')
-                    ->map(function ($id) {
-                        try {
-                            return Crypt::decrypt($id);
-                        } catch (DecryptException $e) {
-                            return null;
-                        }
-                    })
+                    ->map(fn($id) => rescue(fn() => Crypt::decrypt($id), null))
                     ->filter()
                     ->values()
-                    ->toArray();
+                    ->all();
 
                 $d['jadwal_perkuliahan'] = $service->jadwalKuliah();
+
+
                 $d['metadata'] = $service->saya($npm);
                 return view('krs.jadwal-kuliah', $d);
             } else {
@@ -134,7 +133,11 @@ class KrsController extends Controller
                 ], 403);
             }
 
-            dd($krs);
+            DB::connection('db_siade')
+                ->table('tbl_jadwal_pertemuan_absensi')
+                ->where('jadwal_id', $id)
+                ->where('npm', $npm)
+                ->delete();
 
             Krs::where('id', $krs->id)
                 ->delete();
