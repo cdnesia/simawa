@@ -28,6 +28,7 @@ class PendaftaranKKNController extends Controller
         $d['kkn'] = DB::connection('db_siade')->table('tbl_pendaftaran_kegiatan_mahasiswa  as tpkm')
             ->join('tbl_kegiatan_mahasiswa as tkm', 'tpkm.kegiatan_mahasiswa_id', 'tkm.id')
             ->where('npm', $npm)
+            ->whereIn('tkm.tipe', ['KKN', 'PKL'])
             ->select('tpkm.*', 'tkm.nama_kegiatan')
             ->get();
         return view('kkn.view', $d);
@@ -48,6 +49,7 @@ class PendaftaranKKNController extends Controller
         }
         $d['jadwal_kkn'] = true;
         $d['data'] = null;
+
         $d['persyaratan'] = KegiatanMahasiswa::where('tipe', 'KKN')
             ->where('kelas_perkuliahan_id', $kelasPerkuliahan)
             ->whereJsonContains('kode_program_studi', $kodeProdi)

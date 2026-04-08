@@ -41,8 +41,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('transkrip-nilai', TranskripNilaiController::class);
     Route::resource('pendaftaran-kkn', PendaftaranKKNController::class);
     Route::resource('pendaftaran-pkl', PendaftaranPKLController::class);
-    Route::resource('pendaftaran-sidang-tugas-akhir', PendaftaranSeminarController::class);
-    Route::resource('pendaftaran-seminar-proposal', PendaftaranSidangController::class);
+    Route::resource('pendaftaran-seminar-proposal', PendaftaranSeminarController::class);
+    Route::resource('pendaftaran-sidang-tugas-akhir', PendaftaranSidangController::class);
     Route::resource('riwayat-pembayaran', RiwayatPembayaranController::class)->only('index');
     Route::resource('wisuda', WisudaController::class);
 

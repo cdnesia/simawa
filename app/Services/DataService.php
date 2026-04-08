@@ -164,6 +164,17 @@ class DataService
             ->whereDate('tanggal_selesai', '>=', $today);
         return $query->exists();
     }
+    public function jadwalSempro()
+    {
+        $kodeProdi = auth('web')->user()->mahasiswa->kode_program_studi;
+        $today = Carbon::today()->toDateString();
+        $query = KalenderAkademik::where('keg_pendaftaran_seminar_proposal', 1)
+            ->where('status', 'A')
+            ->where('kode_tahun_akademik', $this->tahunAkademikAktif($kodeProdi))
+            ->whereDate('tanggal_mulai', '<=', $today)
+            ->whereDate('tanggal_selesai', '>=', $today);
+        return $query->exists();
+    }
     public function jadwalKuliah()
     {
         $dosen = collect($this->dataDosen())->keyBy('id');
