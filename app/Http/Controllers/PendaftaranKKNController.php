@@ -117,7 +117,7 @@ class PendaftaranKKNController extends Controller
                 ->flatten(1);
 
             $total_sks = $flatKrs->sum('sks_matakuliah');
-            $jumlahD = $flatKrs->where('nilai_huruf', 'D')->count();
+            $jumlahD = $flatKrs->whereIn('nilai_huruf', ['D', 'E'])->count();
             $jumlahKosong = $flatKrs->filter(fn($item) => empty($item['nilai_huruf']))->count();
             $id = Crypt::decrypt($request->id);
 
@@ -132,7 +132,7 @@ class PendaftaranKKNController extends Controller
             if (($jumlahD + $jumlahKosong) > $persyaratan->maksimal_nilai_d) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Gagal mendaftar karena tidak memenuhi persyaratan nilai D.'
+                    'message' => 'Gagal mendaftar karena tidak memenuhi persyaratan minimal nilai D.'
                 ], 422);
             }
 
