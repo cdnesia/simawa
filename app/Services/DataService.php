@@ -305,7 +305,8 @@ class DataService
             ->where('f.status', 'A')
             ->select(
                 'ps.*',
-                'f.nama_fakultas_idn'
+                'f.nama_fakultas_idn',
+                'f.dekan_id',
             )
             ->get()
             ->keyBy('kode_program_studi');
@@ -324,6 +325,9 @@ class DataService
 
         $kelas = $this->dataKelas();
         $q = MasterMahasiswa::where('npm', $npm)->first();
+
+        $dekan_id = $prodis[$q->kode_program_studi]->dekan_id;
+
         return [
             'nama_mahasiswa' => $q->nama_mahasiswa,
             'npm' => $q->npm,
@@ -333,6 +337,8 @@ class DataService
             'nama_program_studi' => $prodis[$q->kode_program_studi]->nama_program_studi_idn ?? '',
             'id_fakultas' => $prodis[$q->kode_program_studi]->fakultas_id ?? '',
             'nama_fakultas' => $prodis[$q->kode_program_studi]->nama_fakultas_idn ?? '',
+            'nidn_dekan' => $dosen[$dekan_id]['nidn'] ?? '',
+            'nama_dekan' => $dosen[$dekan_id]['nama_lengkap'] ?? '',
             'id_kelas' => $q->program_kuliah_id,
             'nama_kelas' => $kelas[$q->program_kuliah_id]->nama_program_perkuliahan ?? '',
             'id_pa' => $q->pa_id,

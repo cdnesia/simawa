@@ -18,11 +18,6 @@ class KhsController extends Controller
     {
         $npm = auth('web')->user()->npm;
         $periode = $request->query('periode');
-        $krsOld = DB::connection('db_siade_old')
-            ->table('krs')
-            ->where('nim', $npm)
-            ->get()
-            ->keyBy('JadwalID');
 
         $dataKrs = $service->krs($npm);
 

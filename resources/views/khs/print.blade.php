@@ -52,6 +52,7 @@
             <td style="text-align: center">
                 <span style="font-size: 24px; font-weight: bold">MAJELIS DIKTILITBANG MUHAMMADIYAH</span> <br>
                 <span style="font-size: 30px; font-weight: bold">UNIVERSITAS MUHAMMADIYAH JAMBI</span> <br>
+                <span style="font-size: 28px; font-weight: bold">{{ Str::upper($saya['nama_fakultas']) }}</span> <br>
                 <span>Jl. Kapten Pattimura, Simpang IV Sipin, Kec. Telanaipura, Kota Jambi, Jambi 36124 - Telp: (0741)
                     60825</span>
             </td>
@@ -156,7 +157,7 @@
     <table style="width:100%;">
         <tr>
             <td style="width:50%; text-align:center;">
-                Pembimbing Akademik
+                Dekan {{ $saya['nama_fakultas'] }}
             </td>
             <td style="width:50%; text-align:center;">
                 Mahasiswa
@@ -170,10 +171,10 @@
 
         <tr>
             <td style="text-align:center; text-decoration: underline">
-                <strong>{{ $saya['dosen_pa'] }}</strong>
+                <strong>{{ $saya['nama_dekan'] }}</strong>
             </td>
             <td style="text-align:center; text-decoration: underline">
-                <strong>{{ $saya['nama_mahasiswa'] }}</strong>
+                <strong>{{ $saya['nidn_dekan'] }}</strong>
             </td>
         </tr>
 
