@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BiodataController;
+use App\Http\Controllers\EdomController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\JadwalController;
 use App\Http\Controllers\JadwalPerkuliahanController;
@@ -53,4 +54,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/reset-password', [AuthController::class, 'showResetForm'])->name('password.request');
     Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+    Route::get('edom.view', [EdomController::class, 'index'])->name('edom.view');
+    Route::post('simpan_edome', [EdomController::class, 'simpan_edome'])
+        ->name('simpan.edome');
 });

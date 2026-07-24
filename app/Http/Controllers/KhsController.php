@@ -36,6 +36,8 @@ class KhsController extends Controller
         $d['semester'] = $semester;
         $d['krs'] = $dataKrs[$periode] ?? ['tahun_akademik' => null, 'semester' => null, 'krs' => []];
         $d['metadata'] = $service->saya($npm);
+        $d['npm'] = $npm;
+        $d['periode'] = $periode;
         return view('khs.view', $d);
     }
 
@@ -47,6 +49,16 @@ class KhsController extends Controller
         $periode = $request->query('periode');
         $npm = auth('web')->user()->npm;
         $dataKrs = $service->krs($npm);
+
+        $dataKRSPeriode = $dataKrs[$periode];
+
+        $jumlahRecord = count($dataKRSPeriode['krs']);
+        $jumlahSudahEdom = collect($dataKRSPeriode['krs'])->where('cek_edom', 1)->count();
+        $bolehCetakKhs = $sudah_isiedom = $jumlahRecord > 0 && $jumlahSudahEdom == $jumlahRecord ? 1 : 0;
+
+        if (!$bolehCetakKhs) {
+            return redirect()->back();
+        }
 
         if (!$periode || !preg_match('/^\d{5}$/', $periode)) {
             $periode = array_key_first($dataKrs);

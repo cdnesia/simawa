@@ -110,6 +110,10 @@ class DataService
                 $total_sks_kumulatif += $sks;
                 $total_bobot_kumulatif += $bobot * $sks;
 
+                // cek edome
+                $id_matakuliah = $row['matakuliah']['id'] ?? '';
+                $id_dosen = $row->jadwal?->dosen_id ?? '';
+                $cek_edome =  $this->cekEdom($ta, $npm, $id_dosen, $id_matakuliah);
                 $krs[$ta]['krs'][] = [
                     'encrypted_id' => Crypt::encrypt($row['id']),
                     'jadwal_id' => Crypt::encrypt($row['jadwal_id']),
@@ -120,15 +124,18 @@ class DataService
                     'lulus' => $row['lulus'] ?? '',
                     'edome' => $row['edome'] ?? '',
                     'kode_mata_kuliah' => $row['matakuliah']['kode_mata_kuliah'] ?? '',
+                    'id_matakuliah' => $row['matakuliah']['id'] ?? '',
                     'nama_mata_kuliah' => $row['matakuliah']['nama_mata_kuliah_idn'] ?? '',
                     'tipe_mata_kuliah' => $row['matakuliah']['mata_kuliah_tipe'] ?? '',
                     'sks_matakuliah' => $sks,
                     'jam_mulai' => $row['jadwal']['jam_mulai'] ?? '',
                     'jam_selesai' => $row['jadwal']['jam_selesai'] ?? '',
                     'dosen_id' => $dosen[$row->jadwal?->dosen_id]['nama_lengkap'] ?? '',
+                    'id_dosen' => $row->jadwal?->dosen_id ?? '',
                     'ruang_id' => $ruang[$row->jadwal?->ruang_id]['nama'] ?? '',
                     'kelompok' => $row['jadwal']['kelompok'] ?? '',
                     'hari' => $row['hari']['nama_hari'] ?? '',
+                    'cek_edom' => $cek_edome ?? ''
                 ];
 
                 $krs[$ta]['metadata'] = [
@@ -137,8 +144,6 @@ class DataService
                 ];
             }
         }
-
-        // dd($krs);
 
         return $krs;
     }
@@ -356,5 +361,24 @@ class DataService
             ->where('npm', $npm)
             ->whereJsonContains('tahun_akademik', $this->tahunAkademikAktif($kodeProdi))
             ->first();
+    }
+
+    //tambahan Hafiz
+    public function cekEdom($periode, $npm, $id_dosen, $id_matakuliah)
+    {
+        $cek_edome = DB::connection('db_siade')
+            ->table('tbl_jawaban_header_survey')
+            ->where('nim', $npm)
+            ->where('tahunid', $periode)
+            ->where('idmk', $id_matakuliah)
+            ->where('dosenid', $id_dosen)
+            ->exists();
+        if ($cek_edome == 1) {
+            $cek_data = 1;
+        } else {
+            $cek_data = 0;
+        }
+
+        return $cek_data;
     }
 }

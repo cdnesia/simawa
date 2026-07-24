@@ -40,13 +40,20 @@
     <div class="card">
         <div class="card-body">
             <div class="mb-3">
+                @php
+                    $jumlahRecord = count($krs['krs']);
+                    $jumlahSudahEdom = collect($krs['krs'])->where('cek_edom', 1)->count();
+
+                    $sudah_isiedom = $jumlahRecord > 0 && $jumlahSudahEdom == $jumlahRecord ? 1 : 0;
+                @endphp
                 <h5>Kartu Hasil Studi</h5>
                 @if ($krs['semester'] && $krs['tahun_akademik'])
                     <h5>Semester {{ $krs['semester'] }} - Tahun Akademik {{ $krs['tahun_akademik'] }}</h5>
-                    <a href="{{ route('khs.print') }}?periode={{ $krs['tahun_akademik'] }}" target="_blank"
-                        class="btn btn-sm btn-primary me-0"><i class="bx bx-printer mr-1"></i> Cetak</a>
+                    @if ($sudah_isiedom == 1)
+                        <a href="{{ route('khs.print') }}?periode={{ $krs['tahun_akademik'] }}" target="_blank"
+                            class="btn btn-sm btn-primary me-0"><i class="bx bx-printer mr-1"></i> Cetak</a>
+                    @endif
                 @endif
-
             </div>
             <div class="table-responsive">
                 <table class="table table-striped table-bordered krsTable" style="width:100%">
@@ -61,21 +68,50 @@
                         <tr>
                             <th class="text-center align-middle" style="width: 50px">Angka</th>
                             <th class="text-center align-middle" style="width: 50px">Huruf</th>
+                            <th class="text-center align-middle" style="width: 50px">Edom</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($krs['krs'] as $item)
                             <tr>
+                                <?php
+                                $cek_edom = $item['cek_edom'];
+                                ?>
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $item['kode_mata_kuliah'] }}</td>
                                 <td>{{ $item['nama_mata_kuliah'] }}</td>
                                 <td class="text-center">{{ $item['sks_matakuliah'] }}</td>
-                                <td class="text-center">{{ $item['nilai_angka'] }}</td>
-                                <td class="text-center">{{ $item['nilai_huruf'] }}</td>
+                                <td class="text-center">{{ $cek_edom == 1 ? $item['nilai_angka'] : '-' }}</td>
+                                <td class="text-center">{{ $cek_edom == 1 ? $item['nilai_huruf'] : '-' }}</td>
+                                <td class="text-center">
+                                    <?php
+                                    if ($item['nilai_huruf'] == null && $item['nilai_angka'] == '0.00'){
+                                    ?>
+                                    <a href="#" class="btn btn-sm btn-danger me-0"><i class="bx bx-file mr-1"></i>
+                                        Belum Punya Nilai</a>
+                                    <?php }else{ ?>
+                                    <?php
+                                    if ($cek_edom == 1){
+                                    ?>
+                                    <a href="#" class="btn btn-sm btn-succes me-0"><i class="bx bx-file mr-1"></i>
+                                        Sudah Isi</a>
+                                    <?php }else{?>
+                                    <a href="{{ route('edom.view', [
+                                        'npm' => $npm,
+                                        'periode' => $periode,
+                                        'id_dosen' => $item['id_dosen'],
+                                        'id_matakuliah' => $item['id_matakuliah'],
+                                    ]) }}"
+                                        class="btn btn-sm btn-warning me-0"><i class="bx bx-file mr-1"></i>
+                                        Isi Edom</a>
+                                    <?php }?>
+                                    <?php }?>
+
+                                </td>
                             </tr>
                         @endforeach
                         <tr>
-                            <th colspan="6">
+                            <th colspan="7">
                                 Jumlah SKS : {{ $krs['jumlah_sks'] ?? 0 }} <br>
                                 IP Semester : {{ $krs['metadata']['ips'] ?? 0 }} <br>
                                 IP Kumulatif : {{ $krs['metadata']['ipk'] ?? 0 }} <br>
@@ -90,7 +126,8 @@
                 Pilih Semester :
                 <ul class="pagination mb-0">
                     @foreach ($semester as $key => $item)
-                        <li class="page-item {{ request('periode') == $item['tahun_akademik'] ? 'active' : '' }}"><a class="page-link"
+                        <li class="page-item {{ request('periode') == $item['tahun_akademik'] ? 'active' : '' }}"><a
+                                class="page-link"
                                 href="{{ route('khs.index') }}?periode={{ $item['tahun_akademik'] }}">{{ $item['semester'] }}</a>
                         </li>
                     @endforeach
