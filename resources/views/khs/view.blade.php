@@ -81,32 +81,35 @@
                                 <td>{{ $item['kode_mata_kuliah'] }}</td>
                                 <td>{{ $item['nama_mata_kuliah'] }}</td>
                                 <td class="text-center">{{ $item['sks_matakuliah'] }}</td>
-                                <td class="text-center">{{ $cek_edom == 1 ? $item['nilai_angka'] : '-' }}</td>
-                                <td class="text-center">{{ $cek_edom == 1 ? $item['nilai_huruf'] : '-' }}</td>
                                 <td class="text-center">
-                                    <?php
-                                    if ($item['nilai_huruf'] == null && $item['nilai_angka'] == '0.00'){
-                                    ?>
-                                    <a href="#" class="btn btn-sm btn-danger me-0"><i class="bx bx-file mr-1"></i>
-                                        Belum Punya Nilai</a>
-                                    <?php }else{ ?>
-                                    <?php
-                                    if ($cek_edom == 1){
-                                    ?>
-                                    <a href="#" class="btn btn-sm btn-succes me-0"><i class="bx bx-file mr-1"></i>
-                                        Sudah Isi</a>
-                                    <?php }else{?>
-                                    <a href="{{ route('edom.view', [
-                                        'npm' => $npm,
-                                        'periode' => $periode,
-                                        'id_dosen' => $item['id_dosen'],
-                                        'id_matakuliah' => $item['id_matakuliah'],
-                                    ]) }}"
-                                        class="btn btn-sm btn-warning me-0"><i class="bx bx-file mr-1"></i>
-                                        Isi Edom</a>
-                                    <?php }?>
-                                    <?php }?>
-
+                                    {{ $cek_edom == 1 || !$item['id_dosen'] ? $item['nilai_angka'] : '-' }}
+                                </td>
+                                <td class="text-center">
+                                    {{ $cek_edom == 1 || !$item['id_dosen'] ? $item['nilai_huruf'] : '-' }}</td>
+                                <td class="text-center">
+                                    @if ($item['nilai_huruf'] == null && $item['nilai_angka'] == '0.00')
+                                        <a href="#" class="btn btn-sm btn-danger me-0"><i class="bx bx-file mr-1"></i>
+                                            Belum Punya Nilai</a>
+                                    @else
+                                        @if (!$item['id_dosen'])
+                                            Tidak ada jadwal
+                                        @else
+                                            @if ($cek_edom == 1)
+                                                <a href="#" class="btn btn-sm btn-succes me-0"><i
+                                                        class="bx bx-file mr-1"></i>
+                                                    Sudah Isi</a>
+                                            @else
+                                                <a href="{{ route('edom.view', [
+                                                    'npm' => $npm,
+                                                    'periode' => $periode,
+                                                    'id_dosen' => $item['id_dosen'],
+                                                    'id_matakuliah' => $item['id_matakuliah'],
+                                                ]) }}"
+                                                    class="btn btn-sm btn-warning me-0"><i class="bx bx-file mr-1"></i>
+                                                    Isi Edom</a>
+                                            @endif
+                                        @endif
+                                    @endif
                                 </td>
                             </tr>
                         @endforeach
