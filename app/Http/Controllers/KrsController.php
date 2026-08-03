@@ -37,7 +37,7 @@ class KrsController extends Controller
 
 
         $d['semester'] = $semester;
-        $d['krs'] = $dataKrs[$periode] ?? ['tahun_akademik' => null, 'semester' => null, 'krs' => []];
+        $d['krs'] = $dataKrs[$periode];
         $d['metadata'] = $service->saya($npm);
         return view('krs.view', $d);
     }
