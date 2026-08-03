@@ -21,6 +21,8 @@ class KhsController extends Controller
 
         $dataKrs = $service->krs($npm);
 
+        dd($dataKrs);
+
         $semester = collect($dataKrs)->map(function ($item, $key) {
             return [
                 'tahun_akademik' => $key,
@@ -35,7 +37,7 @@ class KhsController extends Controller
 
         $d['semester'] = $semester;
 
-        dd($semester);
+        // dd($semester);
 
         $d['krs'] = $dataKrs[$periode];
         $d['metadata'] = $service->saya($npm);
