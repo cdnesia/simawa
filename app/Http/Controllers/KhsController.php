@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Khs;
+use App\Models\Krs;
 use App\Services\DataService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -21,7 +22,16 @@ class KhsController extends Controller
 
         $dataKrs = $service->krs($npm);
 
-        // dd($dataKrs);
+
+        $krsRaw = Krs::with([
+            'jadwal',
+            'mataKuliahJadwal',
+            'mataKuliahLangsung',
+            'hari'
+        ])
+            ->where('npm', $npm)
+            ->get();
+        dd($krsRaw);
 
         $semester = collect($dataKrs)->map(function ($item, $key) {
             return [
