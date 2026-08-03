@@ -34,6 +34,9 @@ class KhsController extends Controller
         }
 
         $d['semester'] = $semester;
+
+        dd($semester);
+
         $d['krs'] = $dataKrs[$periode];
         $d['metadata'] = $service->saya($npm);
         $d['npm'] = $npm;
