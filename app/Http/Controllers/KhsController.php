@@ -21,7 +21,7 @@ class KhsController extends Controller
 
         $dataKrs = $service->krs($npm);
 
-        dd($dataKrs);
+        // dd($dataKrs);
 
         $semester = collect($dataKrs)->map(function ($item, $key) {
             return [
