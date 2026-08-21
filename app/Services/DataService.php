@@ -114,6 +114,7 @@ class DataService
                 $id_matakuliah = $row['matakuliah']['id'] ?? '';
                 $id_dosen = $row->jadwal?->dosen_id ?? '';
                 $cek_edome =  $this->cekEdom($ta, $npm, $id_dosen, $id_matakuliah);
+                
                 $krs[$ta]['krs'][] = [
                     'encrypted_id' => Crypt::encrypt($row['id']),
                     'jadwal_id' => Crypt::encrypt($row['jadwal_id']),
