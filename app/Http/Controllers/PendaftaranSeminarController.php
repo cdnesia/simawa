@@ -61,12 +61,12 @@ class PendaftaranSeminarController extends Controller
             })->toArray();
 
         // $tahunAktif = $dataService->tahunAkademikAktif($kodeProdi);
-        $tahunAktif = 20252;
+        $tahunAktif = [20252, 20261];
         $krs = $dataService->Krs(auth('web')->user()->mahasiswa->npm);
 
         $flatKrs = collect($krs)
-            ->reject(function ($tahun) use ($tahunAktif) {
-                return $tahun == $tahunAktif;
+            ->reject(function ($item, $tahun) use ($tahunAktif) {
+                return in_array($tahun, $tahunAktif);
             })
             ->pluck('krs')
             ->flatten(1);
