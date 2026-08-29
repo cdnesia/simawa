@@ -92,8 +92,9 @@ class PaymentService
         }
         return [$data];
     }
-    public function generateTagihanSekarang()
+    public function generateTagihanSekarang(&$generated = false)
     {
+        $generated = false;
         $url = config('services.simaku_url');
         $npm = auth('web')->user()->npm;
         $kodeProdi = auth('web')->user()->mahasiswa->kode_program_studi;
@@ -129,6 +130,7 @@ class PaymentService
         if (empty($data)) {
             return [];
         }
+        $generated = true;
         return $data;
     }
     public function ambilTagihanTerhutang($npm = null, $tahun_akademik = [])
