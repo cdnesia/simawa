@@ -47,4 +47,11 @@ return [
     'hmac_api_key' => env('HMAC_API_KEY'),
     'hmac_secret'  => env('HMAC_SECRET'),
 
+    'api' => [
+        'base_url' => env('API_BASE_URL', ''),
+        'client_id' => env('API_CLIENT_ID'),
+        'client_secret' => env('API_CLIENT_SECRET'),
+        'private_key' => env('API_PRIVATE_KEY'),
+    ],
+
 ];

@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\KalenderAkademik;
+use App\Models\KegiatanMahasiswa;
 use App\Models\Tagihan;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -11,10 +13,12 @@ use Illuminate\Support\Str;
 class PaymentService
 {
     protected $dataService;
+    protected $apiService;
 
-    public function __construct(DataService $dataService)
+    public function __construct(DataService $dataService, ApiService $apiService)
     {
         $this->dataService = $dataService;
+        $this->apiService = $apiService;
     }
     private function expandTerms(int $start, int $end): array
     {
@@ -204,6 +208,48 @@ class PaymentService
         $responseData = $response->json();
 
         return $responseData;
+    }
+    public function generateTagihanPKL($kegiatan_mahasiswa_id = null)
+    {
+        $npm = auth('web')->user()->npm;
+        $kodeProdi = auth('web')->user()->mahasiswa->kode_program_studi;
+        $tahun_akademik = $this->dataService->tahunAkademikAktif($kodeProdi);
+
+        $persyaratan = KegiatanMahasiswa::find($kegiatan_mahasiswa_id);
+        $dataSaya = $this->dataService->saya($npm);
+
+        $today = Carbon::today()->toDateString();
+        $waktu_berakhir = KalenderAkademik::where('keg_pendaftaran_pkl', 1)
+            ->where('status', 'A')
+            ->where('kode_tahun_akademik', $tahun_akademik)
+            ->whereDate('tanggal_mulai', '<=', $today)
+            ->whereDate('tanggal_selesai', '>=', $today)
+            ->value('tanggal_selesai');
+
+        $nominal = (int) ($persyaratan->biaya_pendaftaran ?? 0);
+
+        $body = [
+            'npm' => $npm,
+            'tahun_akademik' => $tahun_akademik,
+            'jenis_tagihan' => 'PKL',
+            'total_tagihan' => $nominal,
+            'nominal_ditagih' => $nominal,
+            'total_potongan' => 0,
+            'id_kelas_perkuliahan' => (string) ($dataSaya['id_kelas'] ?? ''),
+            'nama_kelas_perkuliahan' => $dataSaya['nama_kelas'] ?? null,
+            'waktu_berakhir' => $waktu_berakhir,
+            'status_aktif' => 'Y',
+            'detail_tagihan' => [
+                [
+                    'nama_bipot' => $persyaratan->nama_kegiatan ?? 'Pendaftaran PKL',
+                    'nominal' => $nominal,
+                    'id_bipot' => $persyaratan->id_bipot ?? null,
+                ],
+            ],
+            'detail_potongan' => [],
+        ];
+
+        return $this->apiService->post('/api/tagihan/create', $body);
     }
     public function cekTagihanKKN($kegiatan_mahasiswa_id = null)
     {
