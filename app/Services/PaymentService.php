@@ -95,10 +95,10 @@ class PaymentService
     private function formatTagihanDariResponse(array $data, $tahun_akademik): array
     {
         $rincian = $data['rincian'] ?? [];
-        $totalTagihan = $data['total_biaya'] ?? collect($rincian)->sum('nominal');
+        $totalTagihan = $data['total_tagihan'] ?? collect($rincian)->sum('nominal');
 
         return [
-            'nomor_tagihan' => $data['nomor_tagihan'] ?? null,
+            'nomor_tagihan' => $data['nomor_tagihan'],
             'tahun_akademik' => $tahun_akademik,
             'detail_tagihan' => json_encode($rincian),
             'total_tagihan' => $totalTagihan,
