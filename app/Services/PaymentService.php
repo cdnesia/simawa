@@ -98,12 +98,12 @@ class PaymentService
         $totalTagihan = $data['total_tagihan'] ?? collect($rincian)->sum('nominal');
 
         return [
-            'nomor_tagihan' => $data['nomor_tagihan'],
+            'nomor_tagihan' => $data['nomor_tagihan'] ?? null,
             'tahun_akademik' => $tahun_akademik,
             'detail_tagihan' => json_encode($rincian),
             'total_tagihan' => $totalTagihan,
             'nominal_ditagih' => $data['nominal_ditagih'] ?? 0,
-            'nominal_terbayar' => $data['nominal_dterbayar'] ?? 0,
+            'nominal_terbayar' => $data['nominal_terbayar'] ?? 0,
         ];
     }
     public function generateTagihanSekarang(&$generated = false)
@@ -135,27 +135,25 @@ class PaymentService
         if (!$npm) {
             $npm = auth('web')->user()->npm;
         }
+        $tahunAktif = $this->dataService->tahunAkademikAktif($kodeProdi);
+        // $tahunAktif = '20261';
 
-        $tahunTerhutang = array_filter([$this->dataService->tahunAkademikAktif($kodeProdi)]);
+        $response = $this->apiService->post('/api/tagihan-spp', [
+            'npm' => $npm,
+            'tahun_akademik' => $tahunAktif,
+        ]);
 
-        $tagihan = collect();
+        $data = $response['data'] ?? [];
 
-        foreach ($tahunTerhutang as $th) {
-            $response = $this->apiService->post('/api/tagihan-spp', [
-                'npm' => $npm,
-                'tahun_akademik' => $th,
-            ]);
-
-            $data = $response['data'] ?? [];
-
-            if (empty($data['rincian'] ?? [])) {
-                continue;
-            }
-
-            $tagihan->push($this->formatTagihanDariResponse($data, $th));
-        }
-
-        return $tagihan->sortBy('tahun_akademik')->values();
+        return collect($data)
+            ->map(function ($item) {
+                if (isset($item['detail_tagihan']) && !is_string($item['detail_tagihan'])) {
+                    $item['detail_tagihan'] = json_encode($item['detail_tagihan']);
+                }
+                return $item;
+            })
+            ->sortBy('tahun_akademik')
+            ->values();
     }
     public function cekKontrakMk()
     {
