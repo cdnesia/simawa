@@ -136,7 +136,7 @@ class PaymentService
             $npm = auth('web')->user()->npm;
         }
 
-        $tahunTerhutang = $this->dataService->tahunAkademikAktif($kodeProdi);
+        $tahunTerhutang = array_filter([$this->dataService->tahunAkademikAktif($kodeProdi)]);
 
         $tagihan = collect();
 
