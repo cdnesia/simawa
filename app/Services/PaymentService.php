@@ -98,12 +98,12 @@ class PaymentService
         $totalTagihan = $data['total_biaya'] ?? collect($rincian)->sum('nominal');
 
         return [
-            'nomor_tagihan' => $rincian[0]['trxid'] ?? null,
+            'nomor_tagihan' => $data['nomor_tagihan'] ?? null,
             'tahun_akademik' => $tahun_akademik,
             'detail_tagihan' => json_encode($rincian),
             'total_tagihan' => $totalTagihan,
-            'nominal_ditagih' => $data['nominal_ditagih'] ?? $totalTagihan,
-            'nominal_terbayar' => 0,
+            'nominal_ditagih' => $data['nominal_ditagih'] ?? 0,
+            'nominal_terbayar' => $data['nominal_dterbayar'] ?? 0,
         ];
     }
     public function generateTagihanSekarang(&$generated = false)
