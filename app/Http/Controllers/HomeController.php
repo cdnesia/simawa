@@ -39,12 +39,11 @@ class HomeController extends Controller
 
         $cekBeasiswa = $service->cekBeasiswa();
 
+        $generated = false;
         $cekTagihanSekarang = $this->payment->generateTagihanSekarang($generated);
-        if ($generated) {
-            return redirect()->route('home');
-        }
 
         $ambilTagihanTerhutang = $this->payment->ambilTagihanTerhutang();
+
         if ($cekBeasiswa) {
             $ambilTagihanTerhutangSelainSPP = collect($ambilTagihanTerhutang)
                 ->filter(function ($item) {

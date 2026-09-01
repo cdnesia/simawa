@@ -92,46 +92,42 @@ class PaymentService
         }
         return [$data];
     }
+    private function formatTagihanDariResponse(array $data, $tahun_akademik): array
+    {
+        $rincian = $data['rincian'] ?? [];
+        $totalTagihan = $data['total_biaya'] ?? collect($rincian)->sum('nominal');
+
+        return [
+            'nomor_tagihan' => $rincian[0]['trxid'] ?? null,
+            'tahun_akademik' => $tahun_akademik,
+            'detail_tagihan' => json_encode($rincian),
+            'total_tagihan' => $totalTagihan,
+            'nominal_ditagih' => $data['nominal_ditagih'] ?? $totalTagihan,
+            'nominal_terbayar' => 0,
+        ];
+    }
     public function generateTagihanSekarang(&$generated = false)
     {
-        $generated = false;
-        $url = config('services.simaku_url');
         $npm = auth('web')->user()->npm;
         $kodeProdi = auth('web')->user()->mahasiswa->kode_program_studi;
         $tahun_akademik = $this->dataService->tahunAkademikAktif($kodeProdi);
 
-        $query = Tagihan::where('npm', $npm)->where('tahun_akademik', $tahun_akademik)->orderBy('tahun_akademik')->get();
-
-        if ($query->isNotEmpty()) {
-            return collect($query)->toArray();
-        }
-
-        $timestamp = time();
-        $nonce = Str::uuid()->toString();
-        $path = 'api/generate-tagihan';
-
-        $body = json_encode([
+        $body = [
             'npm' => $npm,
-        ]);
+            'tahun_akademik' => $tahun_akademik,
+        ];
 
-        $data = $timestamp . $nonce . 'POST' . $path . $body;
-        $signature = hash_hmac('sha256', $data, config('services.hmac_secret'));
-        $response = Http::withHeaders([
-            'X-API-KEY'   => config('services.hmac_api_key'),
-            'X-TIMESTAMP' => $timestamp,
-            'X-NONCE'     => $nonce,
-            'X-SIGNATURE' => $signature,
-        ])->withBody($body, 'application/json')
-            ->post($url . $path);
+        $response = $this->apiService->post('/api/tagihan-spp/create', $body);
 
-        $responseData = $response->json();
+        $generated = (bool) ($response['success'] ?? false);
 
-        $data = $responseData['data'] ?? [];
-        if (empty($data)) {
+        $data = $response['data'] ?? [];
+
+        if (empty($data['rincian'] ?? [])) {
             return [];
         }
-        $generated = true;
-        return $data;
+
+        return [$this->formatTagihanDariResponse($data, $tahun_akademik)];
     }
     public function ambilTagihanTerhutang($npm = null, $tahun_akademik = [])
     {
@@ -139,11 +135,27 @@ class PaymentService
         if (!$npm) {
             $npm = auth('web')->user()->npm;
         }
-        $tahun_akademik = $this->dataService->tahunAkademikAktif($kodeProdi);
 
-        $query = Tagihan::where('npm', $npm)->orderBy('tahun_akademik');
-        $query->where('tahun_akademik', '!=', $tahun_akademik);
-        return $query->get();
+        $tahunTerhutang = $this->tahunPembayaranAktif($kodeProdi);
+
+        $tagihan = collect();
+
+        foreach ($tahunTerhutang as $th) {
+            $response = $this->apiService->post('/api/tagihan-spp', [
+                'npm' => $npm,
+                'tahun_akademik' => $th,
+            ]);
+
+            $data = $response['data'] ?? [];
+
+            if (empty($data['rincian'] ?? [])) {
+                continue;
+            }
+
+            $tagihan->push($this->formatTagihanDariResponse($data, $th));
+        }
+
+        return $tagihan->sortBy('tahun_akademik')->values();
     }
     public function cekKontrakMk()
     {
