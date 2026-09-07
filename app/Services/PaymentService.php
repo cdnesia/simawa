@@ -139,6 +139,8 @@ class PaymentService
 
         $response = $this->apiService->post('api/v1/tagihan/cek', $body);
 
+        dd($response);
+
         if ($response['error_code'] !== 0) {
             return false;
         }
