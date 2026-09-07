@@ -22,17 +22,6 @@ class KhsController extends Controller
 
         $dataKrs = $service->krs($npm);
 
-
-        // $krsRaw = Krs::with([
-        //     'jadwal',
-        //     'mataKuliahJadwal',
-        //     'mataKuliahLangsung',
-        //     'hari'
-        // ])
-        //     ->where('npm', $npm)
-        //     ->get();
-        // dd($krsRaw);
-
         $semester = collect($dataKrs)->map(function ($item, $key) {
             return [
                 'tahun_akademik' => $key,
@@ -46,8 +35,6 @@ class KhsController extends Controller
         }
 
         $d['semester'] = $semester;
-
-        // dd($semester);
 
         $d['krs'] = $dataKrs[$periode];
         $d['metadata'] = $service->saya($npm);
@@ -69,7 +56,7 @@ class KhsController extends Controller
 
         $jumlahRecord = count($dataKRSPeriode['krs']);
         $jumlahSudahEdom = collect($dataKRSPeriode['krs'])->where('cek_edom', 1)->count();
-        $bolehCetakKhs = $sudah_isiedom = $jumlahRecord > 0 && $jumlahSudahEdom == $jumlahRecord ? 1 : 0;
+        $bolehCetakKhs = $jumlahRecord > 0 && $jumlahSudahEdom == $jumlahRecord ? 1 : 0;
 
         if (!$bolehCetakKhs) {
             return redirect()->back();

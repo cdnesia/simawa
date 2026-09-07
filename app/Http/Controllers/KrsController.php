@@ -54,6 +54,7 @@ class KrsController extends Controller
 
         if ($jadwalKontrak) {
             $cekBolehKontrak = $payment->cekKontrakMk();
+
             if ($cekBolehKontrak || $cekBeasiswa) {
                 $TAAktif = $service->tahunAkademikAktif($prodi);
 
