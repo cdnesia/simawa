@@ -39,28 +39,22 @@ class HomeController extends Controller
 
         $cekBeasiswa = $service->cekBeasiswa();
 
-        $generated = false;
-        $cekTagihanSekarang = $this->payment->generateTagihanSekarang($generated);
+        $cekTagihanSekarang = $this->payment->cekTagihanSekarang();
+        if (empty($cekTagihanSekarang)) {
+            $generateTagihanSekarang = $this->payment->generateTagihanSekarang();
 
-        $ambilTagihanTerhutang = $this->payment->ambilTagihanTerhutang();
+            if (!$generateTagihanSekarang['success']) {
+                return redirect()->back()->with('error', $generateTagihanSekarang['message']);
+            }
+        }
+
+        $ambilTagihan = $this->payment->ambilTagihan();
 
         if ($cekBeasiswa) {
-            $ambilTagihanTerhutangSelainSPP = collect($ambilTagihanTerhutang)
-                ->filter(function ($item) {
-                    return in_array($item['jenis_tagihan'], ['KKN']);
-                });
-            $d['tagihan_terhutang'] = $ambilTagihanTerhutangSelainSPP;
-
-            $cekTagihanSelainSPP = collect($cekTagihanSekarang)
-                ->filter(function ($item) {
-                    return in_array($item['jenis_tagihan'], ['KKN']);
-                });
-
-            $d['tagihan_sekarang'] = $cekTagihanSelainSPP;
         } else {
-            $d['tagihan_terhutang'] = $ambilTagihanTerhutang;
-            $d['tagihan_sekarang'] = $cekTagihanSekarang;
+            $d['tagihan_sekarang'] = $ambilTagihan;
         }
+
         return view('home', $d);
     }
 }

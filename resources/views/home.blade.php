@@ -53,30 +53,6 @@
                                 </td>
                             </tr>
                         @endforeach
-                        @foreach ($tagihan_terhutang as $item)
-                            <tr>
-                                <td>{{ $loop->iteration }}</td>
-                                <td>{{ $item['nomor_tagihan'] }}</td>
-                                <td>{{ $item['tahun_akademik'] }}</td>
-                                <td>
-                                    @foreach (json_decode($item['detail_tagihan']) as $val)
-                                        <span class="d-block">
-                                            {{ $val->nama_bipot }}
-                                            Rp. {{ number_format($val->nominal ?? 0, 0, ',', '.') }}
-                                        </span>
-                                    @endforeach
-                                </td>
-                                <td>
-                                    Rp. {{ number_format($item['total_tagihan'] ?? 0, 0, ',', '.') }}
-                                </td>
-                                <td>Rp. {{ number_format($item['nominal_ditagih'] ?? 0, 0, ',', '.') }}</td>
-                                <td>Rp. {{ number_format($item['nominal_terbayar'] ?? 0, 0, ',', '.') }}</td>
-                                <td>
-                                    Rp.
-                                    {{ number_format(($item['total_tagihan'] ?? 0) - ($item['nominal_terbayar'] ?? 0), 0, ',', '.') }}
-                                </td>
-                            </tr>
-                        @endforeach
                     </tbody>
                 </table>
             </div>

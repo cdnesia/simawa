@@ -17,7 +17,7 @@ class DataService
     /**
      * Create a new class instance.
      */
-    public function __construct()
+    public function __construct(protected ApiService $api)
     {
         //
     }
@@ -114,7 +114,7 @@ class DataService
                 $id_matakuliah = $row['matakuliah']['id'] ?? '';
                 $id_dosen = $row->jadwal?->dosen_id ?? '';
                 $cek_edome =  $this->cekEdom($ta, $npm, $id_dosen, $id_matakuliah);
-                
+
                 $krs[$ta]['krs'][] = [
                     'encrypted_id' => Crypt::encrypt($row['id']),
                     'jadwal_id' => Crypt::encrypt($row['jadwal_id']),
@@ -258,60 +258,25 @@ class DataService
 
         return $jadwal_kuliah;
     }
-    private function dataDosen()
+    public function dataDosen()
     {
-        $url = "https://api.umjambi.ac.id/";
-        $timestamp = time();
-        $nonce = Str::uuid()->toString();
-        $path = 'api/data-dosen';
+        $response = $this->api->get('api/v1/pegawai/list');
 
-        $body = json_encode([]);
-
-        $data = $timestamp . $nonce . 'POST' . $path . $body;
-        $signature = hash_hmac('sha256', $data, config('services.hmac_secret'));
-        $response = Http::withHeaders([
-            'X-API-KEY'   => config('services.hmac_api_key'),
-            'X-TIMESTAMP' => $timestamp,
-            'X-NONCE'     => $nonce,
-            'X-SIGNATURE' => $signature,
-        ])->withBody($body, 'application/json')
-            ->post($url . $path);
-
-        $responseData = $response->json();
-        $data = $responseData['data'] ?? [];
-
-        if (empty($data)) {
+        if ($response['error_code'] !== 0) {
             return [];
         }
-        return $data;
+
+        return $response['data']['data'] ?? [];
     }
     private function dataRuang()
     {
-        $url = "https://api.umjambi.ac.id/";
-        $timestamp = time();
-        $nonce = Str::uuid()->toString();
-        $path = 'api/data-ruang';
+        $response = $this->api->get('api/v1/ruangan/list');
 
-        $body = json_encode([]);
-
-        $data = $timestamp . $nonce . 'POST' . $path . $body;
-        $signature = hash_hmac('sha256', $data, config('services.hmac_secret'));
-        $response = Http::withHeaders([
-            'X-API-KEY'   => config('services.hmac_api_key'),
-            'X-TIMESTAMP' => $timestamp,
-            'X-NONCE'     => $nonce,
-            'X-SIGNATURE' => $signature,
-        ])->withBody($body, 'application/json')
-            ->post($url . $path);
-
-        $responseData = $response->json();
-
-        $data = $responseData['data'] ?? [];
-
-        if (empty($data)) {
+        if ($response['error_code'] !== 0) {
             return [];
         }
-        return $data;
+
+        return $response['data']['data'] ?? [];
     }
     private function dataProdi()
     {

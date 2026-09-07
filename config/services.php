@@ -43,15 +43,10 @@ return [
         'logout_url' => env('KEYCLOAK_LOGOUT_URL'),
     ],
 
-    'simaku_url' => env('SIMAKU_URL', 'https://'),
-    'hmac_api_key' => env('HMAC_API_KEY'),
-    'hmac_secret'  => env('HMAC_SECRET'),
-
     'api' => [
-        'base_url' => env('API_BASE_URL', ''),
+        'base_url' => env('API_BASE_URL'),
         'client_id' => env('API_CLIENT_ID'),
         'client_secret' => env('API_CLIENT_SECRET'),
-        'private_key' => env('API_PRIVATE_KEY'),
     ],
 
 ];
