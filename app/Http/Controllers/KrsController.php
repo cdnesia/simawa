@@ -53,8 +53,8 @@ class KrsController extends Controller
         $cekBeasiswa = $service->cekBeasiswa();
 
         if ($jadwalKontrak) {
-            $cekBolehKontrak = collect($payment->cekKontrakMk())->first();
-            if ($cekBolehKontrak['boleh_kontrak'] || $cekBeasiswa) {
+            $cekBolehKontrak = $payment->cekKontrakMk();
+            if ($cekBolehKontrak || $cekBeasiswa) {
                 $TAAktif = $service->tahunAkademikAktif($prodi);
 
                 $krs = collect($service->krs($npm, $TAAktif))->values();

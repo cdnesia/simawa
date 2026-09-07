@@ -127,38 +127,33 @@ class PaymentService
     }
     public function cekKontrakMk()
     {
-        $url = config('services.simaku_url');
         $npm = auth('web')->user()->npm;
         $kodeProdi = auth('web')->user()->mahasiswa->kode_program_studi;
-        $tahun_akademik = $this->dataService->tahunAkademikAktif($kodeProdi);
+        $tahun_akademik = $this->dataService->tahunAkademikAktif($kodeProdi) ?? null;
 
-        $timestamp = time();
-        $nonce = Str::uuid()->toString();
-        $path = 'api/cek-kontrak-matakuliah';
+        $body = [
+            "npm" => [$npm],
+            "tahunAkademik" => [$tahun_akademik],
+            "jenisTagihan" => 'SPP'
+        ];
 
-        $body = json_encode([
-            'npm' => $npm,
-            'tahun_akademik' => $tahun_akademik,
-        ]);
+        $response = $this->apiService->post('api/v1/tagihan/cek', $body);
 
-        $data = $timestamp . $nonce . 'POST' . $path . $body;
-        $signature = hash_hmac('sha256', $data, config('services.hmac_secret'));
-        $response = Http::withHeaders([
-            'X-API-KEY'   => config('services.hmac_api_key'),
-            'X-TIMESTAMP' => $timestamp,
-            'X-NONCE'     => $nonce,
-            'X-SIGNATURE' => $signature,
-        ])->withBody($body, 'application/json')
-            ->post($url . $path);
-
-        $responseData = $response->json();
-
-        $data = $responseData['data'] ?? [];
-
-        if (empty($data)) {
-            return [];
+        if ($response['error_code'] !== 0) {
+            return false;
         }
-        return [$data];
+
+        $data = $response['data']['data'] ?? [];
+        $tagihan = collect($data)->first();
+
+        if (!$tagihan) {
+            return false;
+        }
+
+        $totalTagihan = (float) ($tagihan['total_tagihan'] ?? 0);
+        $nominalTerbayar = (float) ($tagihan['nominal_terbayar'] ?? 0);
+
+        return $totalTagihan > 0 && ($nominalTerbayar / $totalTagihan) >= 0.6;
     }
     public function generateTagihanKKN($kegiatan_mahasiswa_id = null)
     {
