@@ -89,9 +89,12 @@ class PendaftaranSeminarController extends Controller
             $kodeProdi = auth('web')->user()->mahasiswa->kode_program_studi;
             $npm = auth('web')->user()->mahasiswa->npm;
 
-            // $tahunAktif = $dataService->tahunAkademikAktif($kodeProdi);
+            $tahunAktif = $dataService->tahunAkademikAktif($kodeProdi);
 
-            $tahunAktif = [20252, 20261];
+
+            dd($tahunAktif);
+
+            // $tahunAktif = [20252, 20261];
 
             $krs = collect($dataService->Krs($npm));
 

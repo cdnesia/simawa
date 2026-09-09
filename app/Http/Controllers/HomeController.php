@@ -40,11 +40,15 @@ class HomeController extends Controller
         $cekBeasiswa = $service->cekBeasiswa();
 
         $cekTagihanSekarang = $this->payment->cekTagihanSekarang();
+
         if (empty($cekTagihanSekarang)) {
             $generateTagihanSekarang = $this->payment->generateTagihanSekarang();
 
             if (!$generateTagihanSekarang['success']) {
-                return redirect()->back()->with('error', $generateTagihanSekarang['message']);
+
+                if (!str_contains($generateTagihanSekarang['message'] ?? '', 'tidak ditemukan')) {
+                    return redirect()->back()->with('error', $generateTagihanSekarang['message']);
+                }
             }
         }
 

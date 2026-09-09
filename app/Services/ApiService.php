@@ -34,7 +34,7 @@ class ApiService
                 'Accept' => 'application/json',
             ])
             ->timeout(30)
-            ->retry(2, 500);
+            ->retry(2, 500, throw: false);
     }
 
     public function get(string $endpoint): array
@@ -132,7 +132,7 @@ class ApiService
 
                 return [
                     'error_code' => $response->status(),
-                    'error_desc' => 'HTTP error: ' . $response->status(),
+                    'error_desc' => $response->json('message') ?? ('HTTP error: ' . $response->status()),
                     'data' => null,
                 ];
             }
