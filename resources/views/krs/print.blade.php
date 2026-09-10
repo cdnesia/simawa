@@ -110,7 +110,7 @@
                     <td class="text-center">{{ $item['kode_mata_kuliah'] }}</td>
                     <td>{{ $item['nama_mata_kuliah'] }}</td>
                     <td class="text-center">{{ $item['sks_matakuliah'] }}</td>
-                    <td class="text-center">{{ $item['nama_hari'] }},
+                    <td class="text-center">{{ $item['hari'] }},
                         {{ $item['jam_mulai'] }} - {{ $item['jam_selesai'] }}
                     </td>
                 </tr>
