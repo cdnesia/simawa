@@ -45,7 +45,7 @@ class HomeController extends Controller
             $generateTagihanSekarang = $this->payment->generateTagihanSekarang();
 
             if (!$generateTagihanSekarang['success']) {
-
+dd($generateTagihanSekarang);
                 if (!str_contains($generateTagihanSekarang['message'] ?? '', 'tidak ditemukan')) {
                     return redirect()->back()->with('error', $generateTagihanSekarang['message']);
                 }
