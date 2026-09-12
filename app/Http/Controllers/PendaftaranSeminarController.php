@@ -91,9 +91,6 @@ class PendaftaranSeminarController extends Controller
 
             $tahunAktif = $dataService->tahunAkademikAktif($kodeProdi);
 
-
-            dd($tahunAktif);
-
             // $tahunAktif = [20252, 20261];
 
             $krs = collect($dataService->Krs($npm));
