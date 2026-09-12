@@ -139,7 +139,7 @@ class PendaftaranPKLController extends Controller
 
             $generate = $paymentService->generateTagihanPKL($id);
 
-            if (!$generate['success']) {
+            if ($generate['error_code'] !== 0) {
                 return response()->json([
                     'success' => false,
                     'message' => $generate['error_desc'] ?? 'Gagal membuat tagihan'

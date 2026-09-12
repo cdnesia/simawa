@@ -228,6 +228,76 @@ class PaymentService
 
         return $this->apiService->post('/api/tagihan/create', $body);
     }
+    public function generateTagihanSeminarProposal($kegiatan_mahasiswa_id = null)
+    {
+        $npm = auth('web')->user()->npm;
+        $kodeProdi = auth('web')->user()->mahasiswa->kode_program_studi;
+        $tahun_akademik = $this->dataService->tahunAkademikAktif($kodeProdi);
+
+        $persyaratan = KegiatanMahasiswa::find($kegiatan_mahasiswa_id);
+
+        $today = Carbon::today()->toDateString();
+        $waktuBerakhir = KalenderAkademik::where('keg_pendaftaran_seminar_proposal', 1)
+            ->where('status', 'A')
+            ->where('kode_tahun_akademik', $tahun_akademik)
+            ->whereDate('tanggal_mulai', '<=', $today)
+            ->whereDate('tanggal_selesai', '>=', $today)
+            ->value('tanggal_selesai');
+
+        $nominal = (int) ($persyaratan->biaya_pendaftaran ?? 0);
+
+        $body = [
+            'npm' => $npm,
+            'tahunAkademik' => $tahun_akademik,
+            'waktuBerakhir' => $waktuBerakhir,
+            'detailTagihan' => [
+                [
+                    'nominal' => $nominal,
+                    'idBipot' => $persyaratan->id_bipot ?? null,
+                    'namaBipot' => $persyaratan->nama_kegiatan ?? 'Pendaftaran Seminar Proposal',
+                ],
+            ],
+            'detailPotongan' => [],
+            'jenisTagihan' => 'SEMINAR PROPOSAL',
+        ];
+
+        return $this->apiService->post('api/v1/tagihan/create', $body);
+    }
+    public function generateTagihanSidangAkhir($kegiatan_mahasiswa_id = null)
+    {
+        $npm = auth('web')->user()->npm;
+        $kodeProdi = auth('web')->user()->mahasiswa->kode_program_studi;
+        $tahun_akademik = $this->dataService->tahunAkademikAktif($kodeProdi);
+
+        $persyaratan = KegiatanMahasiswa::find($kegiatan_mahasiswa_id);
+
+        $today = Carbon::today()->toDateString();
+        $waktuBerakhir = KalenderAkademik::where('keg_pendaftaran_sidang_akhir', 1)
+            ->where('status', 'A')
+            ->where('kode_tahun_akademik', $tahun_akademik)
+            ->whereDate('tanggal_mulai', '<=', $today)
+            ->whereDate('tanggal_selesai', '>=', $today)
+            ->value('tanggal_selesai');
+
+        $nominal = (int) ($persyaratan->biaya_pendaftaran ?? 0);
+
+        $body = [
+            'npm' => $npm,
+            'tahunAkademik' => $tahun_akademik,
+            'waktuBerakhir' => $waktuBerakhir,
+            'detailTagihan' => [
+                [
+                    'nominal' => $nominal,
+                    'idBipot' => $persyaratan->id_bipot ?? null,
+                    'namaBipot' => $persyaratan->nama_kegiatan ?? 'Pendaftaran Sidang Akhir',
+                ],
+            ],
+            'detailPotongan' => [],
+            'jenisTagihan' => 'SIDANG TUGAS AKHIR',
+        ];
+
+        return $this->apiService->post('api/v1/tagihan/create', $body);
+    }
     public function cekTagihanKKN($kegiatan_mahasiswa_id = null)
     {
         $url = config('services.simaku_url');
