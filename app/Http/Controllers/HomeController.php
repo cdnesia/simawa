@@ -41,14 +41,11 @@ class HomeController extends Controller
 
         $cekTagihanSekarang = $this->payment->cekTagihanSekarang();
 
-        dd($cekTagihanSekarang);
-
         if (empty($cekTagihanSekarang)) {
             $generateTagihanSekarang = $this->payment->generateTagihanSekarang();
 
             if (!$generateTagihanSekarang['success']) {
-dd($generateTagihanSekarang);
-                if (!str_contains($generateTagihanSekarang['message'] ?? '', 'tidak ditemukan')) {
+                if (!str_contains($generateTagihanSekarang['message'] ?? '', 'HTTP error: 404')) {
                     return redirect()->back()->with('error', $generateTagihanSekarang['message']);
                 }
             }
