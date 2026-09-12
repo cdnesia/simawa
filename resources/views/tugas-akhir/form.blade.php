@@ -55,12 +55,31 @@
                                     </span>
                                 @endif
                             </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">Sudah Kontrak MK
+                                Seminar Proposal
+                                @if ($sudah_kontrak_sempro)
+                                    <span class="badge bg-success rounded-pill">
+                                        Memenuhi
+                                    </span>
+                                @else
+                                    <span class="badge bg-danger rounded-pill">
+                                        Tidak Memenuhi
+                                    </span>
+                                @endif
+                            </li>
                         </ul>
                         <div class="card-footer">
-                            <button type="submit" class="btn btn-primary btn-primary btn-sm btn-daftar"
-                                data-id="{{ $item['encrypted_id'] }}">
-                                Daftar
-                            </button>
+                            @if ($jumlah_sks >= $item['minimal_sks'] && $jumlah_d <= $item['maksimal_nilai_d'] && $sudah_kontrak_sempro)
+                                <button type="submit" class="btn btn-primary btn-primary btn-sm btn-daftar"
+                                    data-id="{{ $item['encrypted_id'] }}">
+                                    Daftar
+                                </button>
+                            @else
+                                <button type="button" class="btn btn-secondary btn-sm" disabled
+                                    title="Belum memenuhi seluruh persyaratan pendaftaran">
+                                    Daftar
+                                </button>
+                            @endif
                         </div>
                     </div>
                 </div>

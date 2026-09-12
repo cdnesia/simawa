@@ -38,6 +38,7 @@ class PendaftaranSeminarController extends Controller
      */
     public function create(DataService $dataService)
     {
+        $npm = auth('web')->user()->mahasiswa->npm;
         $kodeProdi = auth('web')->user()->mahasiswa->kode_program_studi;
         $tahunAngkatan = auth('web')->user()->mahasiswa->tahun_angkatan;
         $kelasPerkuliahan = auth('web')->user()->mahasiswa->program_kuliah_id;
@@ -60,9 +61,17 @@ class PendaftaranSeminarController extends Controller
                 return $item;
             })->toArray();
 
-        // $tahunAktif = $dataService->tahunAkademikAktif($kodeProdi);
-        $tahunAktif = [20252, 20261];
-        $krs = $dataService->Krs(auth('web')->user()->mahasiswa->npm);
+        $tahunAktif = $dataService->tahunAkademikAktif($kodeProdi);
+        $krs = $dataService->Krs($npm);
+        $krsRaw = collect($krs)->pluck('krs')->flatten(1);
+
+        $dataSaya = $dataService->saya($npm);
+        $id_fakultas = $dataSaya['id_fakultas'] ?? null;
+        $excludeFakultas = [2];
+
+        $d['sudah_kontrak_sempro'] = !in_array($id_fakultas, $excludeFakultas)
+            ? $krsRaw->where('tipe_mata_kuliah', 4)->isNotEmpty()
+            : $krsRaw->where('tipe_mata_kuliah', 2)->isNotEmpty();
 
         $flatKrs = collect($krs)
             ->reject(function ($item, $tahun) use ($tahunAktif) {
