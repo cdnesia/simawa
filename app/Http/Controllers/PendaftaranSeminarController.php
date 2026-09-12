@@ -75,7 +75,7 @@ class PendaftaranSeminarController extends Controller
 
         $flatKrs = collect($krs)
             ->reject(function ($item, $tahun) use ($tahunAktif) {
-                return in_array($tahun, $tahunAktif);
+                return $tahun == $tahunAktif;
             })
             ->pluck('krs')
             ->flatten(1);
@@ -136,7 +136,7 @@ class PendaftaranSeminarController extends Controller
 
             $flatKrs = collect($krs)
                 ->reject(function ($item, $tahun) use ($tahunAktif) {
-                    return in_array($tahun, $tahunAktif);
+                    return $tahun == $tahunAktif;
                 })
                 ->pluck('krs')
                 ->flatten(1);
