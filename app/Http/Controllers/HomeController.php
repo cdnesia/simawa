@@ -41,6 +41,8 @@ class HomeController extends Controller
 
         $cekTagihanSekarang = $this->payment->cekTagihanSekarang();
 
+        dd($cekTagihanSekarang);
+
         if (empty($cekTagihanSekarang)) {
             $generateTagihanSekarang = $this->payment->generateTagihanSekarang();
 
