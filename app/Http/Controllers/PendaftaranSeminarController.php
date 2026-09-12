@@ -152,47 +152,47 @@ class PendaftaranSeminarController extends Controller
                 ], 422);
             }
 
-            $url = config('services.simaku_url');
-            $npm = auth('web')->user()->npm;
-            $kodeProdi = auth('web')->user()->mahasiswa->kode_program_studi;
-            $tahun_akademik = $dataService->tahunAkademikAktif($kodeProdi);
+            // $url = config('services.simaku_url');
+            // $npm = auth('web')->user()->npm;
+            // $kodeProdi = auth('web')->user()->mahasiswa->kode_program_studi;
+            // $tahun_akademik = $dataService->tahunAkademikAktif($kodeProdi);
 
-            $timestamp = time();
-            $nonce = Str::uuid()->toString();
-            $path = 'api/generate-tagihan-seminar-proposal';
+            // $timestamp = time();
+            // $nonce = Str::uuid()->toString();
+            // $path = 'api/generate-tagihan-seminar-proposal';
 
-            $body = json_encode([
-                'npm' => $npm,
-                'tahun_akademik' => $tahun_akademik,
-                'kegiatan_mahasiswa_id' => $id,
-            ]);
+            // $body = json_encode([
+            //     'npm' => $npm,
+            //     'tahun_akademik' => $tahun_akademik,
+            //     'kegiatan_mahasiswa_id' => $id,
+            // ]);
 
-            $data = $timestamp . $nonce . 'POST' . $path . $body;
-            $signature = hash_hmac('sha256', $data, config('services.hmac_secret'));
-            $response = Http::withHeaders([
-                'X-API-KEY'   => config('services.hmac_api_key'),
-                'X-TIMESTAMP' => $timestamp,
-                'X-NONCE'     => $nonce,
-                'X-SIGNATURE' => $signature,
-            ])->withBody($body, 'application/json')
-                ->post($url . $path);
+            // $data = $timestamp . $nonce . 'POST' . $path . $body;
+            // $signature = hash_hmac('sha256', $data, config('services.hmac_secret'));
+            // $response = Http::withHeaders([
+            //     'X-API-KEY'   => config('services.hmac_api_key'),
+            //     'X-TIMESTAMP' => $timestamp,
+            //     'X-NONCE'     => $nonce,
+            //     'X-SIGNATURE' => $signature,
+            // ])->withBody($body, 'application/json')
+            //     ->post($url . $path);
 
-            $responseData = $response->json();
+            // $responseData = $response->json();
 
-            if (!$responseData['success']) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Gagal membuat tagihan'
-                ], 400);
-            }
+            // if (!$responseData['success']) {
+            //     return response()->json([
+            //         'success' => false,
+            //         'message' => 'Gagal membuat tagihan'
+            //     ], 400);
+            // }
 
-            TugasAkhir::insert([
-                'npm' => auth('web')->user()->mahasiswa->npm,
-                'kegiatan_mahasiswa'  => 'SEMINAR PROPOSAL',
-                'tanggal_pendaftaran' => now(),
-                'id_bipot' => $persyaratan->id_bipot,
-                'biaya_pendaftaran' => $persyaratan->biaya_pendaftaran,
-            ]);
+            // TugasAkhir::insert([
+            //     'npm' => auth('web')->user()->mahasiswa->npm,
+            //     'kegiatan_mahasiswa'  => 'SEMINAR PROPOSAL',
+            //     'tanggal_pendaftaran' => now(),
+            //     'id_bipot' => $persyaratan->id_bipot,
+            //     'biaya_pendaftaran' => $persyaratan->biaya_pendaftaran,
+            // ]);
 
             return response()->json([
                 'success' => true,
