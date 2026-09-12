@@ -80,9 +80,12 @@ class PendaftaranSeminarController extends Controller
             ->pluck('krs')
             ->flatten(1);
 
+        $tipeDikecualikanNilaiD = [1, 3, 4]; // KKN, Skripsi, Seminar Proposal
+        $flatKrsUntukNilaiD = $flatKrs->reject(fn($item) => in_array($item['tipe_mata_kuliah'], $tipeDikecualikanNilaiD));
+
         $total_sks = $flatKrs->sum('sks_matakuliah');
-        $jumlahD = $flatKrs->where('nilai_huruf', 'D')->count();
-        $jumlahKosong = $flatKrs->where('nilai_huruf', '')->count();
+        $jumlahD = $flatKrsUntukNilaiD->where('nilai_huruf', 'D')->count();
+        $jumlahKosong = $flatKrsUntukNilaiD->where('nilai_huruf', '')->count();
 
         $d['jumlah_sks'] = $total_sks;
         $d['jumlah_d'] = $jumlahD + $jumlahKosong;
@@ -141,9 +144,12 @@ class PendaftaranSeminarController extends Controller
                 ->pluck('krs')
                 ->flatten(1);
 
+            $tipeDikecualikanNilaiD = [1, 3, 4]; // KKN, Skripsi, Seminar Proposal
+            $flatKrsUntukNilaiD = $flatKrs->reject(fn($item) => in_array($item['tipe_mata_kuliah'], $tipeDikecualikanNilaiD));
+
             $total_sks = $flatKrs->sum('sks_matakuliah');
-            $jumlahD = $flatKrs->where('nilai_huruf', 'D')->count();
-            $jumlahKosong = $flatKrs->filter(fn($item) => empty($item['nilai_huruf']))->count();
+            $jumlahD = $flatKrsUntukNilaiD->where('nilai_huruf', 'D')->count();
+            $jumlahKosong = $flatKrsUntukNilaiD->filter(fn($item) => empty($item['nilai_huruf']))->count();
             $id = Crypt::decrypt($request->id);
 
             $persyaratan = KegiatanMahasiswa::findOrFail($id);
